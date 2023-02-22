@@ -1,10 +1,10 @@
 # Roles of the Team mebers
 
 ## Roles
-**Key Account Manager:**
+**Key Account Manager:** Michael Kaiser
 
-**Chief Deliverable Officer:**
+**Chief Deliverable Officer:** Manuel Zenklusen
 
-**Quality Evangelist**
+**Quality Evangelist** Ramon Näf
 
-**Master-Tracker:**
+**Master-Tracker:** Luca D' Arcangelo

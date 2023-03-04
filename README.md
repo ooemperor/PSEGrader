@@ -31,7 +31,6 @@ Ramon Näf
 
 Luca D'Arcangelo
 
-Manuel Zenklusen
 
 ## Version History
 

@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2018 Stefano Maggiolo <s.maggiolo@gmail.com>
@@ -18,13 +19,22 @@
 
 """Tests for the AddAdmin script"""
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+
 import unittest
 
 # Needs to be first to allow for monkey patching the DB connection string.
 from cmstestsuite.unit_tests.databasemixin import DatabaseMixin
 
 from cms.db import Admin
+
 from cmscommon.crypto import validate_password
+
 from cmscontrib.AddAdmin import add_admin
 
 
@@ -32,7 +42,7 @@ class TestAddAdmin(DatabaseMixin, unittest.TestCase):
 
     def tearDown(self):
         self.delete_data()
-        super().tearDown()
+        super(TestAddAdmin, self).tearDown()
 
     def assertAdminInDb(self, username, pwd, name, enabled, permission_all):
         """Assert that the admin with the given data is in the DB."""

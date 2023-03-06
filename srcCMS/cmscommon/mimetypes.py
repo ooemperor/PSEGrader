@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2012 Luca Wehrstedt <luca.wehrstedt@gmail.com>
@@ -16,6 +17,16 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+
+import errno
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+
+import io
 import os.path
 
 import xdg.BaseDirectory
@@ -33,11 +44,11 @@ def _retrieve_icons():
     for d in reversed([xdg.BaseDirectory.xdg_data_home]
                       + xdg.BaseDirectory.xdg_data_dirs):
         try:
-            # This is a system file: open it with default system encoding.
-            with open(os.path.join(d, "mime", "generic-icons"), "rt") as f:
+            with io.open(os.path.join(d, "mime", "generic-icons"), "rt") as f:
                 res.update(tuple(l.strip().split(':')) for l in f.readlines())
-        except FileNotFoundError:
-            pass
+        except IOError as err:
+            if err.errno != errno.ENOENT:
+                raise
     return res
 
 
@@ -83,8 +94,7 @@ def get_type_for_file_name(filename):
         e.g., "application/pdf".
 
     """
-    mimetype = xdg.Mime.get_type_by_name(filename)
+    mimetype = xdg.Mime.get_type_by_name(filename).canonical()
     if mimetype is None:
         return None
-    mimetype = mimetype.canonical()
     return "%s/%s" % (mimetype.media, mimetype.subtype)

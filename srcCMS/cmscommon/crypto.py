@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2010-2012 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
@@ -22,13 +23,21 @@
 
 """Utilities dealing with encryption and randomness."""
 
-import binascii
-import random
-from string import ascii_lowercase
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
 
 import bcrypt
-from Cryptodome import Random
-from Cryptodome.Cipher import AES
+import binascii
+import random
+
+from string import ascii_lowercase
+
+from Crypto import Random
+from Crypto.Cipher import AES
 
 from cmscommon.binary import bin_to_hex, hex_to_bin, bin_to_b64, b64_to_bin
 

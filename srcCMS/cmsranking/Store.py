@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2011-2015 Luca Wehrstedt <luca.wehrstedt@gmail.com>
@@ -16,6 +17,15 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+from six import PY3, iterkeys, iteritems
+
+import io
 import json
 import logging
 import os
@@ -33,7 +43,7 @@ logger = logging.getLogger(__name__)
 LOCK = RLock()
 
 
-class Store:
+class Store(object):
     """A store for entities.
 
     Provide methods to perform the CRUD operations (create, retrieve,
@@ -80,20 +90,22 @@ class Store:
             for name in os.listdir(self._path):
                 # TODO check that the key is '[A-Za-z0-9_]+'
                 if name[-5:] == '.json' and name[:-5] != '':
-                    with open(os.path.join(self._path, name), 'rb') as rec:
+                    with io.open(os.path.join(self._path, name), 'rb') as rec:
                         item = self._entity()
                         item.set(json.load(rec))
                         item.key = name[:-5]
                         self._store[name[:-5]] = item
         except OSError:
             # the path isn't a directory or is inaccessible
-            logger.error("Path is not a directory or is not accessible "
-                         "(or other I/O error occurred)", exc_info=True)
+            logger.error("Path is not a directory or is not accessible",
+                         exc_info=True)
+        except IOError:
+            logger.error("I/O error occured", exc_info=True)
         except ValueError:
             logger.error("Invalid JSON", exc_info=False,
                          extra={'location': os.path.join(self._path, name)})
         except InvalidData as exc:
-            logger.error(str(exc), exc_info=False,
+            logger.error(exc.message, exc_info=False,
                          extra={'location': os.path.join(self._path, name)})
 
     def add_create_callback(self, callback):
@@ -155,9 +167,13 @@ class Store:
             # reflect changes on the persistent storage
             try:
                 path = os.path.join(self._path, key + '.json')
-                with open(path, 'wt', encoding="utf-8") as rec:
-                    json.dump(self._store[key].get(), rec)
-            except OSError:
+                if PY3:
+                    with io.open(path, 'wt', encoding="utf-8") as rec:
+                        json.dump(self._store[key].get(), rec)
+                else:
+                    with io.open(path, 'wb') as rec:
+                        json.dump(self._store[key].get(), rec)
+            except IOError:
                 logger.error("I/O error occured while creating entity",
                              exc_info=True)
 
@@ -194,9 +210,13 @@ class Store:
             # reflect changes on the persistent storage
             try:
                 path = os.path.join(self._path, key + '.json')
-                with open(path, 'wt', encoding="utf-8") as rec:
-                    json.dump(self._store[key].get(), rec)
-            except OSError:
+                if PY3:
+                    with io.open(path, 'wt', encoding="utf-8") as rec:
+                        json.dump(self._store[key].get(), rec)
+                else:
+                    with io.open(path, 'wb') as rec:
+                        json.dump(self._store[key].get(), rec)
+            except IOError:
                 logger.error("I/O error occured while updating entity",
                              exc_info=True)
 
@@ -218,7 +238,7 @@ class Store:
             if not isinstance(data_dict, dict):
                 raise InvalidData("Not a dictionary")
             item_dict = dict()
-            for key, value in data_dict.items():
+            for key, value in iteritems(data_dict):
                 try:
                     # FIXME We should allow keys to be arbitrary unicode
                     # strings, so this just needs to be a non-empty check.
@@ -231,9 +251,11 @@ class Store:
                     item.key = key
                     item_dict[key] = item
                 except InvalidData as exc:
-                    raise InvalidData("[entity %s] %s" % (key, exc))
+                    exc.message = "[entity %s] %s" % (key, exc)
+                    exc.args = exc.message,
+                    raise exc
 
-            for key, value in item_dict.items():
+            for key, value in iteritems(item_dict):
                 is_new = key not in self._store
                 old_value = self._store.get(key)
                 # insert entity
@@ -248,9 +270,13 @@ class Store:
                 # reflect changes on the persistent storage
                 try:
                     path = os.path.join(self._path, key + '.json')
-                    with open(path, 'wt', encoding="utf-8") as rec:
-                        json.dump(value.get(), rec)
-                except OSError:
+                    if PY3:
+                        with io.open(path, 'wt', encoding="utf-8") as rec:
+                            json.dump(value.get(), rec)
+                    else:
+                        with io.open(path, 'wb') as rec:
+                            json.dump(value.get(), rec)
+                except IOError:
                     logger.error(
                         "I/O error occured while merging entity lists",
                         exc_info=True)
@@ -275,7 +301,7 @@ class Store:
             del self._store[key]
             # enforce consistency
             for depend in self._depends:
-                for o_key, o_value in list(depend._store.items()):
+                for o_key, o_value in list(iteritems(depend._store)):
                     if not o_value.consistent(self._all_stores):
                         depend.delete(o_key)
             # notify callbacks
@@ -295,7 +321,7 @@ class Store:
         """
         with LOCK:
             # delete all entities
-            for key in list(self._store.keys()):
+            for key in list(iterkeys(self._store)):
                 self.delete(key)
 
     def retrieve(self, key):
@@ -318,7 +344,7 @@ class Store:
     def retrieve_list(self):
         """Retrieve a list of all entities."""
         result = dict()
-        for key, value in self._store.items():
+        for key, value in iteritems(self._store):
             result[key] = value.get()
         return result
 

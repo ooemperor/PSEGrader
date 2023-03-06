@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2016-2017 Stefano Maggiolo <s.maggiolo@gmail.com>
@@ -21,7 +22,18 @@ in the system.
 
 """
 
-from shlex import quote as shell_quote
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+from six import PY3
+
+if PY3:
+    from shlex import quote as shell_quote
+else:
+    from pipes import quote as shell_quote
 
 from cms.grading import Language
 
@@ -48,11 +60,6 @@ class JavaJDK(Language):
         return [".java"]
 
     @property
-    def executable_extension(self):
-        """See Language.executable_extension."""
-        return ".jar" if JavaJDK.USE_JAR else ".zip"
-
-    @property
     def requires_multithreading(self):
         """See Language.requires_multithreading."""
         return True
@@ -72,9 +79,8 @@ class JavaJDK(Language):
             return [compile_command, jar_command]
         else:
             zip_command = ["/bin/sh", "-c",
-                           " ".join(["zip",
-                                     shell_quote(executable_filename),
-                                     "*.class"])]
+                           " ".join(["zip", "-r", "-", "*.class", ">",
+                                     shell_quote(executable_filename)])]
             return [compile_command, zip_command]
 
     def get_evaluation_commands(

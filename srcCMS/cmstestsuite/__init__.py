@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2012 Bernard Blackham <bernard@largestprime.net>
@@ -22,10 +23,17 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import logging
-import subprocess
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
 
-from cmscommon.commands import pretty_print_cmdline
+import io
+import logging
+import os
+import subprocess
 
 
 logger = logging.getLogger(__name__)
@@ -42,22 +50,24 @@ class TestException(Exception):
 
 
 def sh(cmdline, ignore_failure=False):
-    """Execute a simple command.
+    """Execute a simple shell command.
 
-    cmd ([str]): the (unescaped) command to execute.
-    ignore_failure (bool): whether to suppress failures.
-
-    raise (TestException): if the command failed and ignore_failure was False.
+    If cmdline is a string, it is passed to sh -c verbatim.  All escaping must
+    be performed by the user. If cmdline is an array, then no escaping is
+    required.
 
     """
     if CONFIG["VERBOSITY"] >= 1:
-        logger.info('$ %s', pretty_print_cmdline(cmdline))
+        # TODO Use shlex.quote in Python 3.3.
+        logger.info('$ %s', ' '.join(cmdline))
     kwargs = dict()
     if CONFIG["VERBOSITY"] >= 3:
-        kwargs["stdout"] = subprocess.DEVNULL
+        # TODO Use subprocess.DEVNULL in Python 3.3.
+        kwargs["stdout"] = io.open(os.devnull, "wb")
         kwargs["stderr"] = subprocess.STDOUT
-    kwargs["check"] = not ignore_failure
-    try:
-        subprocess.run(cmdline, **kwargs)
-    except subprocess.CalledProcessError as e:
-        raise TestException("Execution failed") from e
+    ret = subprocess.call(cmdline, **kwargs)
+    if not ignore_failure and ret != 0:
+        raise TestException(
+            # TODO Use shlex.quote in Python 3.3.
+            "Execution failed with %d/%d. Tried to execute:\n%s\n" %
+            (ret & 0xff, ret >> 8, ' '.join(cmdline)))

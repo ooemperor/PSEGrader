@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2014 Fabian Gundlach <320pointsguy@gmail.com>
@@ -21,20 +22,27 @@
 
 """
 
-import contextlib
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+
 import cups
+import io
 import logging
 import os
 import subprocess
 import tempfile
 
-from PyPDF2 import PdfFileReader, PdfFileMerger
 from jinja2 import PackageLoader
+from PyPDF2 import PdfFileReader, PdfFileMerger
 
 from cms import config, rmtree
-from cms.db import SessionGen, PrintJob
 from cms.db.filecacher import FileCacher
 from cms.io import Executor, QueueItem, TriggeredService, rpc_method
+from cms.db import SessionGen, PrintJob
 from cms.server.jinja2_toolbox import GLOBAL_ENVIRONMENT
 from cmscommon.commands import pretty_print_cmdline
 from cmscommon.datetime import get_timezone, utc
@@ -62,7 +70,7 @@ class PrintingOperation(QueueItem):
 
 class PrintingExecutor(Executor):
     def __init__(self, file_cacher):
-        super().__init__()
+        super(PrintingExecutor, self).__init__()
 
         self.file_cacher = file_cacher
         self.jinja2_env = GLOBAL_ENVIRONMENT.overlay(
@@ -107,7 +115,7 @@ class PrintingExecutor(Executor):
             # Take the base name just to be sure.
             relname = "source_" + os.path.basename(filename)
             source = os.path.join(directory, relname)
-            with open(source, "wb") as file_:
+            with io.open(source, "wb") as file_:
                 self.file_cacher.get_file_to_fobj(printjob.digest, file_)
 
             if filename.endswith(".pdf") and config.pdf_printing_allowed:
@@ -130,10 +138,11 @@ class PrintingExecutor(Executor):
                        "--right-footer=",
                        "--center-title=" + filename,
                        "--left-title=" + timestr]
-                try:
-                    subprocess.check_call(cmd, cwd=directory)
-                except subprocess.CalledProcessError as e:
-                    raise Exception("Failed to convert text file to ps") from e
+                ret = subprocess.call(cmd, cwd=directory)
+                if ret != 0:
+                    raise Exception(
+                        "Failed to convert text file to ps with command: %s"
+                        "(error %d)" % (pretty_print_cmdline(cmd), ret))
 
                 if not os.path.exists(source_ps):
                     logger.warning("Unable to convert from text to ps.")
@@ -148,13 +157,14 @@ class PrintingExecutor(Executor):
                 cmd = ["ps2pdf",
                        "-sPAPERSIZE=%s" % config.paper_size.lower(),
                        source_ps]
-                try:
-                    subprocess.check_call(cmd, cwd=directory)
-                except subprocess.CalledProcessError as e:
-                    raise Exception("Failed to convert ps file to pdf") from e
+                ret = subprocess.call(cmd, cwd=directory)
+                if ret != 0:
+                    raise Exception(
+                        "Failed to convert ps file to pdf with command: %s"
+                        "(error %d)" % (pretty_print_cmdline(cmd), ret))
 
             # Find out number of pages
-            with open(source_pdf, "rb") as file_:
+            with io.open(source_pdf, "rb") as file_:
                 pdfreader = PdfFileReader(file_)
                 page_count = pdfreader.getNumPages()
 
@@ -172,7 +182,7 @@ class PrintingExecutor(Executor):
             # Add the title page
             title_tex = os.path.join(directory, "title_page.tex")
             title_pdf = os.path.join(directory, "title_page.pdf")
-            with open(title_tex, "w") as f:
+            with io.open(title_tex, "wb") as f:
                 f.write(self.jinja2_env.get_template("title_page.tex")
                         .render(user=user, filename=filename,
                                 timestr=timestr,
@@ -182,16 +192,20 @@ class PrintingExecutor(Executor):
                    "-interaction",
                    "nonstopmode",
                    title_tex]
-            try:
-                subprocess.check_call(cmd, cwd=directory)
-            except subprocess.CalledProcessError as e:
-                raise Exception("Failed to create title page") from e
+            ret = subprocess.call(cmd, cwd=directory)
+            if ret != 0:
+                raise Exception(
+                    "Failed to create title page with command: %s"
+                    "(error %d)" % (pretty_print_cmdline(cmd), ret))
 
-            with contextlib.closing(PdfFileMerger()) as pdfmerger:
-                pdfmerger.append(title_pdf)
-                pdfmerger.append(source_pdf)
-                result = os.path.join(directory, "document.pdf")
-                pdfmerger.write(result)
+            pdfmerger = PdfFileMerger()
+            with io.open(title_pdf, "rb") as file_:
+                pdfmerger.append(file_)
+            with io.open(source_pdf, "rb") as file_:
+                pdfmerger.append(file_)
+            result = os.path.join(directory, "document.pdf")
+            with io.open(result, "wb") as file_:
+                pdfmerger.write(file_)
 
             try:
                 printer_connection = cups.Connection()
@@ -217,7 +231,7 @@ class PrintingService(TriggeredService):
         """Initialize the PrintingService.
 
         """
-        super().__init__(shard)
+        super(PrintingService, self).__init__(shard)
 
         self.file_cacher = FileCacher(self)
 

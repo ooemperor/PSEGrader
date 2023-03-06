@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2010-2012 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
@@ -21,6 +22,14 @@
 """Service that checks the answering times of all services.
 
 """
+
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+from six import iteritems
 
 import logging
 import time
@@ -51,7 +60,7 @@ class Checker(Service):
 
         """
         logger.debug("Checker.check")
-        for coordinates, service in self.remote_services.items():
+        for coordinates, service in iteritems(self.remote_services):
             if coordinates in self.waiting_for:
                 logger.info("Service %s timeout, retrying.", coordinates)
                 del self.waiting_for[coordinates]

@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2010-2014 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
@@ -27,6 +28,13 @@
 
 """
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+
 import logging
 
 from cms.db import Question, Announcement, Message
@@ -50,11 +58,10 @@ class QuestionsNotAllowed(Exception):
 class UnacceptableQuestion(Exception):
     """Raised when a question can't be accepted."""
 
-    def __init__(self, subject, text, text_params=None):
-        super().__init__(subject, text, text_params)
+    def __init__(self, subject, text):
+        super(UnacceptableQuestion, self).__init__(subject, text)
         self.subject = subject
         self.text = text
-        self.text_params = text_params
 
 
 def accept_question(sql_session, participation, timestamp, subject, text):
@@ -91,9 +98,9 @@ def accept_question(sql_session, participation, timestamp, subject, text):
         raise UnacceptableQuestion(
             N_("Question too long!"),
             N_("Subject must be at most %(max_subject_length)d characters, "
-               "content at most %(max_text_length)d."),
-            {"max_subject_length": Question.MAX_SUBJECT_LENGTH,
-             "max_text_length": Question.MAX_TEXT_LENGTH})
+               "content at most %(max_text_length)d."
+               % {"max_subject_length": Question.MAX_SUBJECT_LENGTH,
+                  "max_text_length": Question.MAX_TEXT_LENGTH}))
 
     question = Question(timestamp, subject, text, participation=participation)
     sql_session.add(question)

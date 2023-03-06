@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2015-2016 Stefano Maggiolo <s.maggiolo@gmail.com>
@@ -21,9 +22,16 @@ functions to compute them).
 
 """
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+from six import iterkeys, iteritems
+
 import unittest
 
-# Needs to be first to allow for monkey patching the DB connection string.
 from cmstestsuite.unit_tests.databasemixin import DatabaseMixin
 
 from cms.io.priorityqueue import PriorityQueue
@@ -34,7 +42,7 @@ from cms.service.esoperations import ESOperation, get_submissions_operations, \
 class TestESOperations(DatabaseMixin, unittest.TestCase):
 
     def setUp(self):
-        super().setUp()
+        super(TestESOperations, self).setUp()
 
         # First set up the interesting contest, with a few copies
         # of everything.
@@ -65,7 +73,7 @@ class TestESOperations(DatabaseMixin, unittest.TestCase):
 
     def tearDown(self):
         self.session.close()
-        super().tearDown()
+        super(TestESOperations, self).tearDown()
 
     # Testing get_submissions_operations.
 
@@ -82,7 +90,7 @@ class TestESOperations(DatabaseMixin, unittest.TestCase):
         submission, results = self.add_submission_with_results(
             self.tasks[0], self.participation, True)
         for result in results:
-            for testcase in result.dataset.testcases.values():
+            for codename, testcase in iteritems(result.dataset.testcases):
                 self.add_evaluation(result, testcase)
 
         # A submission reaching maximum tries for compilation
@@ -185,7 +193,7 @@ class TestESOperations(DatabaseMixin, unittest.TestCase):
         evaluated_codenames = set()
         for result in results:
             # Pick one arbitrary testcase.
-            evaluated_codename = next(iter(result.dataset.testcases.keys()))
+            evaluated_codename = next(iterkeys(result.dataset.testcases))
             self.add_evaluation(
                 result, result.dataset.testcases[evaluated_codename])
             evaluated_codenames.add(evaluated_codename)

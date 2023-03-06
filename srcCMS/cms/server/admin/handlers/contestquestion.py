@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2010-2013 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
@@ -25,15 +26,20 @@
 
 """
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+
 import logging
 
-try:
-    import tornado4.web as tornado_web
-except ImportError:
-    import tornado.web as tornado_web
+import tornado.web
 
 from cms.db import Contest, Question, Participation
 from cmscommon.datetime import make_datetime
+
 from .base import BaseHandler, require_permission
 
 
@@ -77,7 +83,7 @@ class QuestionReplyHandler(BaseHandler):
 
         # Protect against URLs providing incompatible parameters.
         if self.contest is not question.participation.contest:
-            raise tornado_web.HTTPError(404)
+            raise tornado.web.HTTPError(404)
 
         reply_subject_code = self.get_argument("reply_question_quick_answer",
                                                "")
@@ -118,7 +124,7 @@ class QuestionIgnoreHandler(BaseHandler):
 
         # Protect against URLs providing incompatible parameters.
         if self.contest is not question.participation.contest:
-            raise tornado_web.HTTPError(404)
+            raise tornado.web.HTTPError(404)
 
         should_ignore = self.get_argument("ignore", "no") == "yes"
 
@@ -147,11 +153,11 @@ class QuestionClaimHandler(BaseHandler):
 
         # Protect against URLs providing incompatible parameters.
         if self.contest is not question.participation.contest:
-            raise tornado_web.HTTPError(404)
+            raise tornado.web.HTTPError(404)
 
         # Can claim/unclaim only a question not ignored or answered.
         if question.ignored or question.reply_timestamp is not None:
-            raise tornado_web.HTTPError(405)
+            raise tornado.web.HTTPError(405)
 
         should_claim = self.get_argument("claim", "no") == "yes"
 

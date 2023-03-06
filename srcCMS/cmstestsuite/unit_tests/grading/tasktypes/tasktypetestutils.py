@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2018 Stefano Maggiolo <s.maggiolo@gmail.com>
@@ -18,9 +19,17 @@
 
 """Utilities for testing task types."""
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+
 import functools
+
 from collections import deque
-from unittest.mock import patch, MagicMock
+from mock import patch, MagicMock
 
 from cms import config
 
@@ -39,16 +48,14 @@ def fake_evaluation_commands(base, exe, main=None, args=None):
 
 
 def make_language(name, source_extensions, header_extensions,
-                  executable_extension, compilation_command,
-                  evaluation_command):
+                  compilation_command, evaluation_command):
     """Create a language (actually a MagicMock) with the given data."""
     language = MagicMock()
     language.configure_mock(name=name,
                             source_extensions=source_extensions,
                             source_extension=source_extensions[0],
                             header_extensions=header_extensions,
-                            header_extension=header_extensions[0],
-                            executable_extension=executable_extension)
+                            header_extension=header_extensions[0])
     language.get_compilation_commands.side_effect = \
         functools.partial(fake_compilation_commands, compilation_command)
     language.get_evaluation_commands.side_effect = \
@@ -61,9 +68,9 @@ COMPILATION_COMMAND_1 = ["comp", "comm1"]
 COMPILATION_COMMAND_2 = ["comp", "comm2"]
 EVALUATION_COMMAND_1 = ["run1"]
 EVALUATION_COMMAND_2 = ["run2"]
-LANG_1 = make_language("L1", [".l1"], [".hl1"], "",
+LANG_1 = make_language("L1", [".l1"], [".hl1"],
                        COMPILATION_COMMAND_1, EVALUATION_COMMAND_1)
-LANG_2 = make_language("L2", [".l2"], [".hl2"], ".ext",
+LANG_2 = make_language("L2", [".l2"], [".hl2"],
                        COMPILATION_COMMAND_2, EVALUATION_COMMAND_2)
 
 
@@ -84,7 +91,7 @@ STATS_RE = {
 }
 
 
-class TaskTypeTestMixin:
+class TaskTypeTestMixin(object):
     """A test mixin to make it easier to test task types."""
 
     def setUpMocks(self, tasktype):
@@ -151,7 +158,7 @@ class TaskTypeTestMixin:
         return patched
 
     def tearDown(self):
-        super().tearDown()
+        super(TaskTypeTestMixin, self).tearDown()
         # Make sure the test used all declared sandboxes.
         self.assertEqual(len(self.sandboxes), 0)
 

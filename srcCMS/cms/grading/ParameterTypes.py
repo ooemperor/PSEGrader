@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2010-2012 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
@@ -27,6 +28,14 @@ represented by JSON objects.
 
 """
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+from six import string_types, with_metaclass
+
 from abc import ABCMeta, abstractmethod
 
 from jinja2 import Markup
@@ -34,7 +43,7 @@ from jinja2 import Markup
 from cms.server.jinja2_toolbox import GLOBAL_ENVIRONMENT
 
 
-class ParameterType(metaclass=ABCMeta):
+class ParameterType(with_metaclass(ABCMeta, object)):
     """Base class for parameter types."""
 
     TEMPLATE = None
@@ -123,7 +132,7 @@ class ParameterTypeString(ParameterType):
 """)
 
     def validate(self, value):
-        if not isinstance(value, str):
+        if not isinstance(value, string_types):
             raise ValueError(
                 "Invalid value for string parameter %s" % self.name)
 
@@ -153,7 +162,7 @@ class ParameterTypeChoice(ParameterType):
 
     TEMPLATE = GLOBAL_ENVIRONMENT.from_string("""
 <select name="{{ prefix ~ parameter.short_name }}">
-{% for choice_value, choice_description in parameter.values.items() %}
+{% for choice_value, choice_description in iteritems(parameter.values) %}
   <option value="{{ choice_value }}"
           {% if choice_value == previous_value %}selected{% endif %}>
     {{ choice_description }}
@@ -168,7 +177,8 @@ class ParameterTypeChoice(ParameterType):
         values (dict): dictionary mapping each choice to a short description.
 
         """
-        super().__init__(name, short_name, description)
+        super(ParameterTypeChoice, self).__init__(
+            name, short_name, description)
         self.values = values
 
     def validate(self, value):
@@ -208,7 +218,8 @@ class ParameterTypeCollection(ParameterType):
         subparameters ([ParameterType]): list of types of each sub-parameter.
 
         """
-        super().__init__(name, short_name, description)
+        super(ParameterTypeCollection, self).__init__(
+            name, short_name, description)
         self.subparameters = subparameters
 
     def validate(self, value):

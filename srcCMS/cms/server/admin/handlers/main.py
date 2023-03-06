@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2010-2013 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
@@ -25,6 +26,13 @@
 
 """
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+
 import json
 import logging
 
@@ -32,6 +40,7 @@ from cms import ServiceCoord, get_service_shards, get_service_address
 from cms.db import Admin, Contest, Question
 from cmscommon.crypto import validate_password
 from cmscommon.datetime import make_datetime, make_timestamp
+
 from .base import BaseHandler, SimpleHandler, require_permission
 
 

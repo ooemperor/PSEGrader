@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2013 Stefano Maggiolo <s.maggiolo@gmail.com>
@@ -21,15 +22,23 @@
 
 """
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+import six
+
 # We enable monkey patching to make many libraries gevent-friendly
 # (for instance, urllib3, used by requests)
 import gevent.monkey
 gevent.monkey.patch_all()  # noqa
 
 import unittest
-from unittest.mock import patch, PropertyMock
 
 import gevent
+from mock import patch, PropertyMock
 
 # Needs to be first to allow for monkey patching the DB connection string.
 from cmstestsuite.unit_tests.databasemixin import DatabaseMixin
@@ -42,7 +51,7 @@ from cmstestsuite.unit_tests.testidgenerator import unique_long_id, \
 class TestScoringService(DatabaseMixin, unittest.TestCase):
 
     def setUp(self):
-        super().setUp()
+        super(TestScoringService, self).setUp()
 
         self.score_info = (unique_long_id(), unique_long_id(),
                            unique_long_id(), unique_long_id(),
@@ -94,8 +103,8 @@ class TestScoringService(DatabaseMixin, unittest.TestCase):
         gevent.sleep(0.1)  # Needed to trigger the score loop.
 
         # Asserts that compute_score was called.
-        self.assertCountEqual(self.call_args,
-                              [(sr.submission_id, sr.dataset_id)])
+        six.assertCountEqual(self, self.call_args,
+                             [(sr.submission_id, sr.dataset_id)])
         self.session.expire(sr)
         self.assertEqual((sr.score, sr.score_details,
                           sr.public_score, sr.public_score_details,
@@ -117,9 +126,9 @@ class TestScoringService(DatabaseMixin, unittest.TestCase):
         gevent.sleep(0.1)  # Needed to trigger the score loop.
 
         # Asserts that compute_score was called.
-        self.assertCountEqual(self.call_args,
-                              [(sr_a.submission_id, sr_a.dataset_id),
-                               (sr_b.submission_id, sr_b.dataset_id)])
+        six.assertCountEqual(self, self.call_args,
+                             [(sr_a.submission_id, sr_a.dataset_id),
+                              (sr_b.submission_id, sr_b.dataset_id)])
 
     def test_new_evaluation_already_scored(self):
         """One submission is not re-scored if already scored.

@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2010-2014 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
@@ -29,13 +30,19 @@
 
 """
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+from six import iterkeys
+
 import logging
+import os
 import traceback
 
-try:
-    import tornado4.web as tornado_web
-except ImportError:
-    import tornado.web as tornado_web
+import tornado.web
 from werkzeug.datastructures import LanguageAccept
 from werkzeug.http import parse_accept_header
 
@@ -56,7 +63,7 @@ class BaseHandler(CommonRequestHandler):
     """
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(BaseHandler, self).__init__(*args, **kwargs)
         # The list of interface translations the user can choose from.
         self.available_translations = self.service.translations
         # The translation that best matches the user's system settings
@@ -79,11 +86,11 @@ class BaseHandler(CommonRequestHandler):
         """This method is executed at the beginning of each request.
 
         """
-        super().prepare()
+        super(BaseHandler, self).prepare()
         self.setup_locale()
 
     def setup_locale(self):
-        lang_codes = list(self.available_translations.keys())
+        lang_codes = list(iterkeys(self.available_translations))
 
         browser_langs = parse_accept_header(
             self.request.headers.get("Accept-Language", ""),
@@ -140,7 +147,7 @@ class BaseHandler(CommonRequestHandler):
 
     def write_error(self, status_code, **kwargs):
         if "exc_info" in kwargs and \
-                kwargs["exc_info"][0] != tornado_web.HTTPError:
+                kwargs["exc_info"][0] != tornado.web.HTTPError:
             exc_info = kwargs["exc_info"]
             logger.error(
                 "Uncaught exception (%r) while processing a request: %s",

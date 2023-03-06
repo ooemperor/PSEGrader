@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2010-2015 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
@@ -22,6 +23,14 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+from six import iteritems, itervalues
 
 from collections import namedtuple
 
@@ -100,8 +109,7 @@ def compute_changes_for_dataset(old_dataset, new_dataset):
 
 # Computing global scores (for ranking).
 
-def task_score(participation, task,
-               public=False, only_tokened=False, rounded=False):
+def task_score(participation, task, public=False, only_tokened=False):
     """Return the score of a contest's user on a task.
 
     participation (Participation): the user and contest for which to
@@ -114,7 +122,6 @@ def task_score(participation, task,
         at the results of tokened submissions (that is, the score that the user
         would obtain if all non-tokened submissions scored 0.0, or equivalently
         had not been scored yet).
-    rounded (bool): if True, round the score to the task's score_precision.
 
     return ((float, bool)): the score of user on task, and True if not
         all submissions of the participation in the task have been scored.
@@ -162,16 +169,13 @@ def task_score(participation, task,
         score_details_tokened.append((score, score_details, s.tokened()))
 
     if task.score_mode == SCORE_MODE_MAX:
-        score = _task_score_max(score_details_tokened)
-    elif task.score_mode == SCORE_MODE_MAX_SUBTASK:
-        score = _task_score_max_subtask(score_details_tokened)
+        return _task_score_max(score_details_tokened), partial
+    if task.score_mode == SCORE_MODE_MAX_SUBTASK:
+        return _task_score_max_subtask(score_details_tokened), partial
     elif task.score_mode == SCORE_MODE_MAX_TOKENED_LAST:
-        score = _task_score_max_tokened_last(score_details_tokened)
+        return _task_score_max_tokened_last(score_details_tokened), partial
     else:
         raise ValueError("Unknown score mode '%s'" % task.score_mode)
-    if rounded:
-        score = round(score, task.score_precision)
-    return score, partial
 
 
 def _task_score_max_tokened_last(score_details_tokened):
@@ -248,10 +252,10 @@ def _task_score_max_subtask(score_details_tokened):
             # Task's score type is not group, assume a single subtask.
             subtask_scores = {1: score}
 
-        for idx, score in subtask_scores.items():
+        for idx, score in iteritems(subtask_scores):
             max_scores[idx] = max(max_scores.get(idx, 0.0), score)
 
-    return sum(max_scores.values())
+    return sum(itervalues(max_scores))
 
 
 def _task_score_max(score_details_tokened):

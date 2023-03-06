@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2016-2017 Stefano Maggiolo <s.maggiolo@gmail.com>
@@ -21,6 +22,13 @@ and runtime "mono" installed in the system.
 
 """
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+
 from cms.grading import Language
 
 
@@ -42,11 +50,6 @@ class CSharpMono(Language):
     def source_extensions(self):
         """See Language.source_extensions."""
         return [".cs"]
-
-    @property
-    def executable_extension(self):
-        """See Language.executable_extension."""
-        return ".exe"
 
     @property
     def requires_multithreading(self):

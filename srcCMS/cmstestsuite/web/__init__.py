@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2012 Bernard Blackham <bernard@largestprime.net>
@@ -21,11 +22,19 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+from six import itervalues, iteritems
+
 import datetime
+import io
 import sys
 import time
 import traceback
-from abc import ABCMeta, abstractmethod
 
 import requests
 
@@ -33,7 +42,7 @@ import requests
 debug = False
 
 
-class Browser:
+class Browser(object):
     def __init__(self):
         self.xsrf_token = None
         self.session = requests.Session()
@@ -72,16 +81,15 @@ class Browser:
             try:
                 data = data.copy()
                 data['_xsrf'] = self.xsrf_token
-                for k, v in file_names:
-                    file_objs[k] = open(v, "rb")
+                file_objs = dict((k, io.open(v, "rb")) for k, v in file_names)
                 response = self.session.post(url, data, files=file_objs)
             finally:
-                for fobj in file_objs.values():
+                for fobj in itervalues(file_objs):
                     fobj.close()
         return response
 
 
-class GenericRequest(metaclass=ABCMeta):
+class GenericRequest(object):
     """Request to a server.
 
     """
@@ -204,23 +212,23 @@ class GenericRequest(metaclass=ABCMeta):
         res = "URL: %s\n" % self.url
         if self.response is not None:
             res += "\nREQUEST HEADERS\n"
-            for key, value in self.response.request.headers.items():
+            for key, value in iteritems(self.response.request.headers):
                 res += "%s: %s\n" % (key, value)
             res += "\nREQUEST DATA\n%s\n" % self.response.request.body
         else:
             res += "\nNO REQUEST INFORMATION AVAILABLE\n"
         if self.res_data is not None:
             res += "\nRESPONSE HEADERS\n"
-            for key, value in self.response.headers.items():
+            for key, value in iteritems(self.response.headers):
                 res += "%s: %s\n" % (key, value)
             res += "\nRESPONSE DATA\n%s\n" % (self.res_data)
         else:
             res += "\nNO RESPONSE INFORMATION AVAILABLE\n"
         return res
 
-    @abstractmethod
     def describe(self):
-        pass
+        raise NotImplementedError("Please subclass this class "
+                                  "and actually implement some request")
 
     def store_to_file(self, fd):
         print("Test type: %s" % (self.__class__.__name__), file=fd)

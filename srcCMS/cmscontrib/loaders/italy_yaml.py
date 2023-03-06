@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2010-2014 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
@@ -6,7 +7,7 @@
 # Copyright © 2010-2012 Matteo Boscariol <boscarim@hotmail.com>
 # Copyright © 2013-2018 Luca Wehrstedt <luca.wehrstedt@gmail.com>
 # Copyright © 2014-2018 William Di Luigi <williamdiluigi@gmail.com>
-# Copyright © 2015-2019 Luca Chiodini <luca@chiodini.org>
+# Copyright © 2015 Luca Chiodini <luca@chiodini.org>
 # Copyright © 2016 Andrea Cracco <guilucand@gmail.com>
 # Copyright © 2018 Edoardo Morassutto <edoardo.morassutto@gmail.com>
 #
@@ -23,16 +24,22 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+
+import io
 import logging
 import os
 import os.path
 import sys
+import yaml
 from datetime import timedelta
 
-import yaml
-
-from cms import TOKEN_MODE_DISABLED, TOKEN_MODE_FINITE, TOKEN_MODE_INFINITE, \
-    FEEDBACK_LEVEL_FULL, FEEDBACK_LEVEL_RESTRICTED
+from cms import TOKEN_MODE_DISABLED, TOKEN_MODE_FINITE, TOKEN_MODE_INFINITE
 from cms.db import Contest, User, Task, Statement, Attachment, Team, Dataset, \
     Manager, Testcase
 from cms.grading.languagemanager import LANGUAGES, HEADER_EXTS
@@ -41,6 +48,7 @@ from cmscommon.constants import \
 from cmscommon.crypto import build_password
 from cmscommon.datetime import make_datetime
 from cmscontrib import touch
+
 from .base_loader import ContestLoader, TaskLoader, UserLoader, TeamLoader
 
 
@@ -59,11 +67,6 @@ yaml.SafeLoader.add_constructor("tag:yaml.org,2002:str", construct_yaml_str)
 
 def getmtime(fname):
     return os.stat(fname).st_mtime
-
-
-def load_yaml_from_path(path):
-    with open(path, "rt", encoding="utf-8") as f:
-        return yaml.safe_load(f)
 
 
 def load(src, dst, src_name, dst_name=None, conv=lambda i: i):
@@ -152,7 +155,9 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
             logger.critical("File missing: \"contest.yaml\"")
             return None
 
-        conf = load_yaml_from_path(os.path.join(self.path, "contest.yaml"))
+        conf = yaml.safe_load(
+            io.open(os.path.join(self.path, "contest.yaml"),
+                    "rt", encoding="utf-8"))
 
         # Here we update the time of the last import
         touch(os.path.join(self.path, ".itime_contest"))
@@ -210,7 +215,6 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
         load(conf, args, ["start", "inizio"], conv=make_datetime)
         load(conf, args, ["stop", "fine"], conv=make_datetime)
         load(conf, args, ["per_user_time"], conv=make_timedelta)
-        load(conf, args, ["timezone"])
 
         load(conf, args, "max_submission_number")
         load(conf, args, "max_user_test_number")
@@ -219,7 +223,6 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
 
         tasks = load(conf, None, ["tasks", "problemi"])
         participations = load(conf, None, ["users", "utenti"])
-        participations = [] if participations is None else participations
         for p in participations:
             p["password"] = build_password(p["password"])
 
@@ -241,8 +244,9 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
         username = os.path.basename(self.path)
         logger.info("Loading parameters for user %s.", username)
 
-        conf = load_yaml_from_path(
-            os.path.join(os.path.dirname(self.path), "contest.yaml"))
+        conf = yaml.safe_load(
+            io.open(os.path.join(os.path.dirname(self.path), "contest.yaml"),
+                    "rt", encoding="utf-8"))
 
         args = {}
 
@@ -282,8 +286,9 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
         team_code = os.path.basename(self.path)
         logger.info("Loading parameters for team %s.", team_code)
 
-        conf = load_yaml_from_path(
-            os.path.join(os.path.dirname(self.path), "contest.yaml"))
+        conf = yaml.safe_load(
+            io.open(os.path.join(os.path.dirname(self.path), "contest.yaml"),
+                    "rt", encoding="utf-8"))
 
         args = {}
 
@@ -316,17 +321,20 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
         # We first look for the yaml file inside the task folder,
         # and eventually fallback to a yaml file in its parent folder.
         try:
-            conf = load_yaml_from_path(os.path.join(self.path, "task.yaml"))
-        except OSError as err:
+            conf = yaml.safe_load(
+                io.open(os.path.join(self.path, "task.yaml"),
+                        "rt", encoding="utf-8"))
+        except IOError as err:
             try:
                 deprecated_path = os.path.join(self.path, "..", name + ".yaml")
-                conf = load_yaml_from_path(deprecated_path)
+                conf = yaml.safe_load(io.open(deprecated_path, "rt",
+                                              encoding="utf-8"))
 
                 logger.warning("You're using a deprecated location for the "
                                "task.yaml file. You're advised to move %s to "
                                "%s.", deprecated_path,
                                os.path.join(self.path, "task.yaml"))
-            except OSError:
+            except IOError:
                 # Since both task.yaml and the (deprecated) "../taskname.yaml"
                 # are missing, we will only warn the user that task.yaml is
                 # missing (to avoid encouraging the use of the deprecated one)
@@ -378,13 +386,6 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
             args["primary_statements"] = [primary_language]
 
         args["submission_format"] = ["%s.%%l" % name]
-
-        # Import the feedback level when explicitly set to full
-        # (default behaviour is restricted)
-        if conf.get("feedback_level", None) == FEEDBACK_LEVEL_FULL:
-            args["feedback_level"] = FEEDBACK_LEVEL_FULL
-        elif conf.get("feedback_level", None) == FEEDBACK_LEVEL_RESTRICTED:
-            args["feedback_level"] = FEEDBACK_LEVEL_RESTRICTED
 
         if conf.get("score_mode", None) == SCORE_MODE_MAX:
             args["score_mode"] = SCORE_MODE_MAX
@@ -447,9 +448,6 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
                     "Attachment %s for task %s" % (filename, name))
                 args["attachments"][filename] = Attachment(filename, digest)
 
-        # Score precision.
-        load(conf, args, "score_precision")
-
         task = Task(**args)
 
         args = {}
@@ -458,9 +456,7 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
         args["autojudge"] = False
 
         load(conf, args, ["time_limit", "timeout"], conv=float)
-        # The Italian YAML format specifies memory limits in MiB.
-        load(conf, args, ["memory_limit", "memlimit"],
-             conv=lambda mb: mb * 1024 * 1024)
+        load(conf, args, ["memory_limit", "memlimit"])
 
         # Builds the parameters that depend on the task type
         args["managers"] = []
@@ -524,7 +520,7 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
         # Detect subtasks by checking GEN
         gen_filename = os.path.join(self.path, 'gen', 'GEN')
         try:
-            with open(gen_filename, "rt", encoding="utf-8") as gen_file:
+            with io.open(gen_filename, "rt", encoding="utf-8") as gen_file:
                 subtasks = []
                 testcases = 0
                 points = None
@@ -591,7 +587,7 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
                     assert int(conf['n_input']) == n_input
 
         # If gen/GEN doesn't exist, just fallback to Sum
-        except OSError:
+        except IOError:
             args["score_type"] = "Sum"
             total_value = float(conf.get("total_value", 100.0))
             input_value = 0.0
@@ -630,17 +626,10 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
                     num_processes = load(conf, None, "num_processes")
                     if num_processes is None:
                         num_processes = 1
-                    io_type = load(conf, None, "user_io")
-                    if io_type is not None:
-                        if io_type not in ["std_io", "fifo_io"]:
-                            logger.warning("user_io incorrect. Valid options "
-                                           "are 'std_io' and 'fifo_io'. "
-                                           "Ignored.")
-                            io_type = None
                     logger.info("Task type Communication")
                     args["task_type"] = "Communication"
                     args["task_type_parameters"] = \
-                        [num_processes, "alone", io_type or "std_io"]
+                        [num_processes, "stub", "fifo_io"]
                     digest = self.file_cacher.put_file_from_path(
                         path,
                         "Manager for task %s" % task.name)
@@ -654,8 +643,6 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
                                 stub_name,
                                 "Stub for task %s and language %s" % (
                                     task.name, lang.name))
-                            args["task_type_parameters"] = \
-                                [num_processes, "stub", io_type or "fifo_io"]
                             args["managers"] += [
                                 Manager(
                                     "stub%s" % lang.source_extension, digest)]
@@ -768,10 +755,13 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
         # We first look for the yaml file inside the task folder,
         # and eventually fallback to a yaml file in its parent folder.
         try:
-            conf = load_yaml_from_path(os.path.join(self.path, "task.yaml"))
-        except OSError:
-            conf = load_yaml_from_path(
-                os.path.join(self.path, "..", name + ".yaml"))
+            conf = yaml.safe_load(
+                io.open(os.path.join(self.path, "task.yaml"),
+                        "rt", encoding="utf-8"))
+        except IOError:
+            conf = yaml.safe_load(
+                io.open(os.path.join(self.path, "..", name + ".yaml"),
+                        "rt", encoding="utf-8"))
 
         # If there is no .itime file, we assume that the task has changed
         if not os.path.exists(os.path.join(self.path, ".itime")):

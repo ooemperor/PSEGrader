@@ -445,10 +445,8 @@ CMS.AWSUtils.prototype.two_digits = function(n) {
 
 /**
  * Update the remaining time showed in the "remaining" div.
- *
- * timer (int): handle for the timer that called this function, or -1 if none
  */
-CMS.AWSUtils.prototype.update_remaining_time = function(timer = -1) {
+CMS.AWSUtils.prototype.update_remaining_time = function() {
     // We assume this.phase always is the correct phase (since this
     // method also refreshes the page when the phase changes).
     var relevant_timestamp = null;
@@ -478,8 +476,8 @@ CMS.AWSUtils.prototype.update_remaining_time = function(timer = -1) {
     var countdown_sec =
         relevant_timestamp - this.timestamp - (now - this.first_date) / 1000;
     if (countdown_sec <= 0) {
-        clearInterval(timer);
         location.reload();
+        return;
     }
 
     $("#remaining_text").text(text);
@@ -537,7 +535,7 @@ CMS.AWSUtils.prototype.repr_job = function(job) {
             + ' the <a href="' + this.url("submission", job["object_id"], job["dataset_id"]) + '">result</a>'
             + ' of <a href="' + this.url("submission", job["object_id"]) + '">submission ' + job["object_id"] + '</a>'
             + ' on <a href="' + this.url("dataset", job["dataset_id"]) + '">dataset ' + job["dataset_id"] + '</a>'
-            + (job_type == 'Evaluating' && job["multiplicity"]
+            + (job["multiplicity"]
                ? " [" + job["multiplicity"] + " time(s) in queue]"
                : "")
             + (job["testcase_codename"]

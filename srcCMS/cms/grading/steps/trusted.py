@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2010-2015 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
@@ -35,6 +36,14 @@ can be translated by writing "translate:x" where x is "success", "partial" or
 
 """
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+
+import errno
 import logging
 
 from cms import config
@@ -145,7 +154,7 @@ def trusted_step(sandbox, commands):
     sandbox.max_processes = config.trusted_sandbox_max_processes
     sandbox.timeout = config.trusted_sandbox_max_time_s
     sandbox.wallclock_timeout = 2 * sandbox.timeout + 1
-    sandbox.address_space = config.trusted_sandbox_max_memory_kib * 1024
+    sandbox.address_space = config.trusted_sandbox_max_memory_kib
 
     # Run the trusted commands.
     stats = generic_step(sandbox, commands, "trusted")
@@ -241,7 +250,11 @@ def checker_step(sandbox, checker_digest, input_digest, correct_output_digest,
     except ValueError as e:
         logger.error("Invalid output from checker: %s", e)
         return False, None, None
-    except FileNotFoundError as e:
+    except OSError as e:
+        # Change OSError to FileNotFoundError and drop the check for being a
+        # file not found errno when dropping Python 2.
+        if e.errno != errno.ENOENT:
+            raise
         # This should not happen, as the redirect is handled by the sandbox.
         logger.error("Missing stdout or stderr file from checker: %s", e)
         return False, None, None

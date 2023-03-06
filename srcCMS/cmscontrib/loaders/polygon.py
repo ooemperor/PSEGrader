@@ -1,11 +1,11 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Programming contest management system
 # Copyright © 2014 Artem Iglikov <artem.iglikov@gmail.com>
 # Copyright © 2014-2017 Stefano Maggiolo <s.maggiolo@gmail.com>
 # Copyright © 2018 Edoardo Morassutto <edoardo.morassutto@gmail.com>
 # Copyright © 2018 Luca Wehrstedt <luca.wehrstedt@gmail.com>
-# Copyright © 2021 Grace Hawkins <amoomajid99@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -20,19 +20,31 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+from six import iteritems
+
 import imp
+import io
 import logging
 import os
 import subprocess
+
+from datetime import datetime
+from datetime import timedelta
+
 import xml.etree.ElementTree as ET
-from datetime import datetime, timedelta
 
 from cms import config
 from cms.db import Contest, User, Task, Statement, Dataset, Manager, Testcase
 from cmscommon.crypto import build_password
 from cmscontrib import touch
-from .base_loader import ContestLoader, TaskLoader, UserLoader
 
+from .base_loader import ContestLoader, TaskLoader, UserLoader
 
 logger = logging.getLogger(__name__)
 
@@ -41,68 +53,8 @@ def make_timedelta(t):
     return timedelta(seconds=t)
 
 
-LANGUAGE_MAP = {
-    'afrikaans': 'af',
-    'arabic': 'ar',
-    'armenian': 'hy',
-    'azerbaijani': 'az',
-    'belarusian': 'be',
-    'bengali': 'bn',
-    'bosnian': 'bs',
-    'bulgarian': 'bg',
-    'catalan': 'ca',
-    'chinese': 'zh',
-    'croatian': 'hr',
-    'czech': 'cs',
-    'danish': 'da',
-    'dutch': 'nl',
-    'english': 'en',
-    'estonian': 'et',
-    'filipino': 'fil',
-    'finnish': 'fi',
-    'french': 'fr',
-    'georgian': 'ka',
-    'german': 'de',
-    'greek': 'el',
-    'hebrew': 'he',
-    'hindi': 'hi',
-    'hungarian': 'hu',
-    'icelandic': 'is',
-    'indonesian': 'id',
-    'irish': 'ga',
-    'italian': 'it',
-    'japanese': 'ja',
-    'kazakh': 'kk',
-    'korean': 'ko',
-    'kyrgyz': 'ky',
-    'latvian': 'lv',
-    'lithuanian': 'lt',
-    'macedonian': 'mk',
-    'malay': 'ms',
-    'mongolian': 'mn',
-    'norwegian': 'no',
-    'persian': 'fa',
-    'polish': 'pl',
-    'portuguese': 'pt',
-    'romanian': 'ro',
-    'russian': 'ru',
-    'serbian': 'sr',
-    'sinhala': 'si',
-    'slovak': 'sk',
-    'slovene': 'sl',
-    'spanish': 'es',
-    'swedish': 'sv',
-    'tajik': 'tg',
-    'tamil': 'ta',
-    'thai': 'th',
-    'turkish': 'tr',
-    'turkmen': 'tk',
-    'ukrainian': 'uk',
-    'urdu': 'ur',
-    'uzbek': 'uz',
-    'vietnamese': 'vi',
-    'other': 'other',
-}
+# TODO: add all languages.
+LANGUAGE_MAP = {'english': 'en', 'russian': 'ru', 'italian': 'it'}
 
 
 class PolygonTaskLoader(TaskLoader):
@@ -173,7 +125,7 @@ class PolygonTaskLoader(TaskLoader):
         if get_statement:
             args["statements"] = {}
             args["primary_statements"] = []
-            for language, lang in LANGUAGE_MAP.items():
+            for language, lang in iteritems(LANGUAGE_MAP):
                 path = os.path.join(self.path, 'statements',
                                     '.pdf', language, 'problem.pdf')
                 if os.path.exists(path):
@@ -209,7 +161,7 @@ class PolygonTaskLoader(TaskLoader):
         task_cms_conf = None
         if os.path.exists(task_cms_conf_path):
             logger.info("Found additional CMS options for task %s.", name)
-            with open(task_cms_conf_path, 'rb') as f:
+            with io.open(task_cms_conf_path, 'rb') as f:
                 task_cms_conf = imp.load_module('cms_conf', f,
                                                 task_cms_conf_path,
                                                 ('.py', 'r', imp.PY_SOURCE))
@@ -231,8 +183,7 @@ class PolygonTaskLoader(TaskLoader):
             tl = float(testset.find('time-limit').text)
             ml = int(testset.find('memory-limit').text)
             args["time_limit"] = tl * 0.001
-            # Polygon specifies the memory limit in bytes.
-            args["memory_limit"] = ml
+            args["memory_limit"] = ml // (1024 * 1024)
 
             args["managers"] = {}
             infile_param = judging.attrib['input-file']
@@ -366,7 +317,7 @@ class PolygonUserLoader(UserLoader):
         users_path = os.path.join(
             os.path.dirname(self.path), 'contestants.txt')
         if os.path.exists(users_path):
-            with open(users_path, "rt", encoding="utf-8") as users_file:
+            with io.open(users_path, "rt", encoding="utf-8") as users_file:
                 for user in users_file.readlines():
                     user = user.strip().split(';')
                     name = user[0].strip()
@@ -496,7 +447,7 @@ class PolygonContestLoader(ContestLoader):
 
         users_path = os.path.join(self.path, 'contestants.txt')
         if os.path.exists(users_path):
-            with open(users_path, "rt", encoding="utf-8") as users_file:
+            with io.open(users_path, "rt", encoding="utf-8") as users_file:
                 for user in users_file.readlines():
                     user = user.strip()
                     user = user.split(';')

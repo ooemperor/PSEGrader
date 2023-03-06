@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2018 Stefano Maggiolo <s.maggiolo@gmail.com>
@@ -18,10 +19,18 @@
 
 """Utilities for testing score types."""
 
-from unittest.mock import Mock
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+from six import iterkeys
+
+from mock import Mock
 
 
-class ScoreTypeTestMixin:
+class ScoreTypeTestMixin(object):
     """A test mixin to make it easier to test score types."""
 
     def assertComputeScore(self, scores, total, public, rws_scores):
@@ -36,7 +45,7 @@ class ScoreTypeTestMixin:
         # Reversed to make sure the score type does not depend on the order.
         sr.evaluations = [
             ScoreTypeTestMixin.get_evaluation(codename, 1.0)
-            for codename in reversed(sorted(testcases.keys()))]
+            for codename in reversed(sorted(iterkeys(testcases)))]
         return sr
 
     @staticmethod

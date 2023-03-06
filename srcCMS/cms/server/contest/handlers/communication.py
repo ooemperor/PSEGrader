@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2010-2014 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
@@ -27,16 +28,21 @@
 
 """
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+
 import logging
 
-try:
-    import tornado4.web as tornado_web
-except ImportError:
-    import tornado.web as tornado_web
+import tornado.web
 
 from cms.server import multi_contest
 from cms.server.contest.communication import accept_question, \
     UnacceptableQuestion, QuestionsNotAllowed
+
 from .contest import ContestHandler
 
 
@@ -53,7 +59,7 @@ class CommunicationHandler(ContestHandler):
     and the contest managers..
 
     """
-    @tornado_web.authenticated
+    @tornado.web.authenticated
     @multi_contest
     def get(self):
         self.render("communication.html", **self.r_params)
@@ -63,7 +69,7 @@ class QuestionHandler(ContestHandler):
     """Called when the user submits a question.
 
     """
-    @tornado_web.authenticated
+    @tornado.web.authenticated
     @multi_contest
     def post(self):
         try:
@@ -72,9 +78,9 @@ class QuestionHandler(ContestHandler):
                             self.get_argument("question_text", ""))
             self.sql_session.commit()
         except QuestionsNotAllowed:
-            raise tornado_web.HTTPError(404)
+            raise tornado.web.HTTPError(404)
         except UnacceptableQuestion as e:
-            self.notify_error(e.subject, e.text, e.text_params)
+            self.notify_error(e.subject, e.text)
         else:
             self.notify_success(N_("Question received"),
                                 N_("Your question has been received, you "

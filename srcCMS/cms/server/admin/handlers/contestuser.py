@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2010-2013 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
@@ -29,15 +30,20 @@
 
 """
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+
 import logging
 
-try:
-    import tornado4.web as tornado_web
-except ImportError:
-    import tornado.web as tornado_web
+import tornado.web
 
 from cms.db import Contest, Message, Participation, Submission, User, Team
 from cmscommon.datetime import make_datetime
+
 from .base import BaseHandler, require_permission
 
 
@@ -104,7 +110,7 @@ class RemoveParticipationHandler(BaseHandler):
                             .first()
         # Check that the participation is valid.
         if participation is None:
-            raise tornado_web.HTTPError(404)
+            raise tornado.web.HTTPError(404)
 
         submission_query = self.sql_session.query(Submission)\
             .filter(Submission.participation == participation)
@@ -180,7 +186,7 @@ class ParticipationHandler(BaseHandler):
 
         # Check that the participation is valid.
         if participation is None:
-            raise tornado_web.HTTPError(404)
+            raise tornado.web.HTTPError(404)
 
         submission_query = self.sql_session.query(Submission)\
             .filter(Submission.participation == participation)
@@ -205,7 +211,7 @@ class ParticipationHandler(BaseHandler):
 
         # Check that the participation is valid.
         if participation is None:
-            raise tornado_web.HTTPError(404)
+            raise tornado.web.HTTPError(404)
 
         try:
             attrs = participation.get_attrs()
@@ -257,7 +263,7 @@ class MessageHandler(BaseHandler):
 
         # check that the participation is valid
         if participation is None:
-            raise tornado_web.HTTPError(404)
+            raise tornado.web.HTTPError(404)
 
         message = Message(make_datetime(),
                           self.get_argument("message_subject", ""),

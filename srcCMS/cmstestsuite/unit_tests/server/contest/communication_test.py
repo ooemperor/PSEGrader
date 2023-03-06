@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2018 Luca Wehrstedt <luca.wehrstedt@gmail.com>
@@ -20,6 +21,14 @@
 
 """
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+import six
+
 import unittest
 from datetime import timedelta
 
@@ -35,7 +44,7 @@ from cmscommon.datetime import make_datetime, make_timestamp
 class TestAcceptQuestion(DatabaseMixin, unittest.TestCase):
 
     def setUp(self):
-        super().setUp()
+        super(TestAcceptQuestion, self).setUp()
         self.timestamp = make_datetime()
         self.contest = self.add_contest(allow_questions=True)
         self.user = self.add_user()
@@ -68,7 +77,7 @@ class TestAcceptQuestion(DatabaseMixin, unittest.TestCase):
 class TestGetCommunications(DatabaseMixin, unittest.TestCase):
 
     def setUp(self):
-        super().setUp()
+        super(TestGetCommunications, self).setUp()
         self.timestamp = make_datetime()
         self.contest = self.add_contest()
         self.user = self.add_user()
@@ -81,7 +90,7 @@ class TestGetCommunications(DatabaseMixin, unittest.TestCase):
     def add_announcement(self, subject, text, timestamp, contest=None):
         if contest is None:
             contest = self.contest
-        super().add_announcement(
+        super(TestGetCommunications, self).add_announcement(
             subject=subject, text=text, timestamp=self.at(timestamp),
             contest=contest)
         d = {"type": "announcement", "subject": subject, "text": text,
@@ -91,7 +100,7 @@ class TestGetCommunications(DatabaseMixin, unittest.TestCase):
     def add_message(self, subject, text, timestamp, participation=None):
         if participation is None:
             participation = self.participation
-        super().add_message(
+        super(TestGetCommunications, self).add_message(
             subject=subject, text=text, timestamp=self.at(timestamp),
             participation=participation)
         d = {"type": "message", "subject": subject, "text": text,
@@ -101,7 +110,7 @@ class TestGetCommunications(DatabaseMixin, unittest.TestCase):
     def add_question(self, subject, text, timestamp, participation=None):
         if participation is None:
             participation = self.participation
-        q = super().add_question(
+        q = super(TestGetCommunications, self).add_question(
             subject=subject, text=text, question_timestamp=self.at(timestamp),
             participation=participation)
         return q
@@ -132,13 +141,13 @@ class TestGetCommunications(DatabaseMixin, unittest.TestCase):
 
         """
         for test_time in range(test_interval):
-            self.assertCountEqual(
-                self.call(test_time),
+            six.assertCountEqual(
+                self, self.call(test_time),
                 res if ts <= test_time else [])
         for test_time_after in range(test_interval):
             for test_time_until in range(test_time_after + 1, test_interval):
-                self.assertCountEqual(
-                    self.call(test_time_until, after=test_time_after),
+                six.assertCountEqual(
+                    self, self.call(test_time_until, after=test_time_after),
                     res if test_time_after < ts <= test_time_until else [])
 
     def test_no_elements(self):

@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2010-2013 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
@@ -9,7 +10,6 @@
 # Copyright © 2015 Luca Versari <veluca93@gmail.com>
 # Copyright © 2015 William Di Luigi <williamdiluigi@gmail.com>
 # Copyright © 2016 Amir Keivan Mohtashami <akmohtashami97@gmail.com>
-# Copyright © 2019 Edoardo Morassutto <edoardo.morassutto@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -28,10 +28,17 @@
 
 """
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+
 import json
 import logging
 import string
-from urllib.parse import urljoin, urlsplit
+from future.moves.urllib.parse import urljoin, urlsplit
 
 import gevent
 import gevent.queue
@@ -40,9 +47,9 @@ import requests.exceptions
 from sqlalchemy import not_
 
 from cms import config
+from cms.io import Executor, QueueItem, TriggeredService, rpc_method
 from cms.db import SessionGen, Contest, Participation, Task, Submission, \
     get_submissions
-from cms.io import Executor, QueueItem, TriggeredService, rpc_method
 from cmscommon.datetime import make_timestamp
 
 
@@ -98,19 +105,6 @@ def safe_put_data(ranking, resource, data, operation):
         msg = "Status %s while %s." % (res.status_code, operation)
         logger.warning(msg)
         raise CannotSendError(msg)
-
-
-def safe_url(url):
-    """Return a sanitized URL without sensitive information.
-
-       url (unicode): the URL to sanitize.
-       return (unicode): sanitized URL.
-
-    """
-    parts = urlsplit(url)
-    netloc = parts.hostname if parts.hostname is not None else ""
-    netloc += ":%d" % parts.port if parts.port is not None else ""
-    return parts._replace(netloc=netloc).geturl()
 
 
 class ProxyOperation(QueueItem):
@@ -176,10 +170,9 @@ class ProxyExecutor(Executor):
             supposed to listen.
 
         """
-        super().__init__(batch_executions=True)
+        super(ProxyExecutor, self).__init__(batch_executions=True)
 
         self._ranking = ranking
-        self._visible_ranking = safe_url(ranking)
 
     def execute(self, entries):
         """Consume (i.e. send) the data put in the queue, forever.
@@ -213,8 +206,8 @@ class ProxyExecutor(Executor):
                     # We abuse the resource path as the English
                     # (plural) name for the entity type.
                     name = self.RESOURCE_PATHS[i]
-                    operation = "sending %s to ranking %s" % (
-                                    name, self._visible_ranking)
+                    operation = "sending %s to ranking %s" % (name,
+                                                              self._ranking)
 
                     logger.debug(operation.capitalize())
                     safe_put_data(
@@ -261,7 +254,7 @@ class ProxyService(TriggeredService):
         contest_id (int): the ID of the contest to manage.
 
         """
-        super().__init__(shard)
+        super(ProxyService, self).__init__(shard)
 
         self.contest_id = contest_id
 
@@ -351,8 +344,7 @@ class ProxyService(TriggeredService):
                     users[encode_id(user.username)] = {
                         "f_name": user.first_name,
                         "l_name": user.last_name,
-                        "team": encode_id(team.code)
-                                if team is not None else None,
+                        "team": team.code if team is not None else None,
                     }
                     if team is not None:
                         teams[encode_id(team.code)] = {
@@ -477,15 +469,6 @@ class ProxyService(TriggeredService):
                              "unexistent submission id %s.", submission_id)
                 raise KeyError("Submission not found.")
 
-            # ScoringService sent us a submission of another contest, they
-            # do not know about our contest_id in multicontest setup.
-            if submission.task.contest_id != self.contest_id:
-                logger.debug("Ignoring submission %d of contest %d "
-                             "(this ProxyService considers contest %d only).",
-                             submission.id, submission.task.contest_id,
-                             self.contest_id)
-                return
-
             if submission.participation.hidden:
                 logger.info("[submission_scored] Score for submission %d "
                             "not sent because the participation is hidden.",
@@ -521,15 +504,6 @@ class ProxyService(TriggeredService):
                              "unexistent submission id %s.", submission_id)
                 raise KeyError("Submission not found.")
 
-            # ScoringService sent us a submission of another contest, they
-            # do not know about our contest_id in multicontest setup.
-            if submission.task.contest_id != self.contest_id:
-                logger.debug("Ignoring submission %d of contest %d "
-                             "(this ProxyService considers contest %d only).",
-                             submission.id, submission.task.contest_id,
-                             self.contest_id)
-                return
-
             if submission.participation.hidden:
                 logger.info("[submission_tokened] Token for submission %d "
                             "not sent because participation is hidden.",
@@ -563,15 +537,6 @@ class ProxyService(TriggeredService):
         with SessionGen() as session:
             task = Task.get_from_id(task_id, session)
             dataset = task.active_dataset
-
-            # This ProxyService may focus on a different contest, and it should
-            # ignore this update.
-            if task.contest_id != self.contest_id:
-                logger.debug("Ignoring dataset change for task %d of contest "
-                             "%d (this ProxyService considers contest %d "
-                             "only).", task_id, task.contest.id,
-                             self.contest_id)
-                return
 
             logger.info("Dataset update for task %d (dataset now is %d).",
                         task.id, dataset.id)

@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2010-2014 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
@@ -23,6 +24,15 @@
 
 """
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+
+import errno
+import io
 import os
 import random
 import shutil
@@ -32,17 +42,19 @@ from io import BytesIO
 # Needs to be first to allow for monkey patching the DB connection string.
 from cmstestsuite.unit_tests.databasemixin import DatabaseMixin
 
-from cms.db.filecacher import FileCacher
 from cmscommon.digest import Digester, bytes_digest
+from cms.db.filecacher import FileCacher
 
 
-class RandomFile:
+class RandomFile(object):
     """Simulate a random file with dim bytes, calculating its
     SHA1 hash.
 
     """
     def __init__(self, dim):
         self.dim = dim
+        # FIXME We could use os.urandom() instead.
+        self.source = io.open('/dev/urandom', 'rb')
         self.digester = Digester()
 
     def read(self, byte_num):
@@ -58,16 +70,16 @@ class RandomFile:
             byte_num = self.dim
         if byte_num == 0:
             return b''
-        buf = os.urandom(byte_num)
+        buf = self.source.read(byte_num)
         self.dim -= len(buf)
         self.digester.update(buf)
         return buf
 
     def close(self):
-        """Do nothing.
+        """Close the source file.
 
         """
-        pass
+        self.source.close()
 
     @property
     def digest(self):
@@ -79,7 +91,7 @@ class RandomFile:
         return self.digester.digest()
 
 
-class HashingFile:
+class HashingFile(object):
     """Hashes the content written to this files.
 
     """
@@ -114,7 +126,7 @@ class HashingFile:
         pass
 
 
-class TestFileCacherBase:
+class TestFileCacherBase(object):
     """Base class for performing tests for the FileCacher service.
 
     """
@@ -135,8 +147,11 @@ class TestFileCacherBase:
         cache_path = os.path.join(self.cache_base_path, digest)
         try:
             os.unlink(cache_path)
-        except FileNotFoundError:
-            pass
+        except OSError as e:
+            # Only ignore if the file didn't exist. Other failures we should
+            # know about!
+            if e.errno == errno.ENOENT:
+                pass
 
         # Pull it out of the file_cacher and compute the hash
         hash_file = HashingFile()
@@ -168,14 +183,16 @@ class TestFileCacherBase:
 
         """
         self.size = 100
-        self.content = bytes(random.getrandbits(8) for _ in range(self.size))
+        # We need to wrap the generator in a list because of a
+        # shortcoming of future's bytes implementation.
+        self.content = bytes([random.getrandbits(8) for _ in range(self.size)])
 
         data = self.file_cacher.put_file_from_fobj(BytesIO(self.content),
                                                    "Test #000")
 
         if not os.path.exists(os.path.join(self.cache_base_path, data)):
             self.fail("File not stored in local cache.")
-        with open(os.path.join(self.cache_base_path, data), "rb") as f:
+        with io.open(os.path.join(self.cache_base_path, data), "rb") as f:
             if f.read() != self.content:
                 self.fail("Local cache's content differ "
                           "from original file.")
@@ -184,7 +201,7 @@ class TestFileCacherBase:
 
         # Retrieve the file.
         self.fake_content = b"Fake content.\n"
-        with open(self.cache_path, "wb") as cached_file:
+        with io.open(self.cache_path, "wb") as cached_file:
             cached_file.write(self.fake_content)
         try:
             data = self.file_cacher.get_file(self.digest)
@@ -221,7 +238,7 @@ class TestFileCacherBase:
             self.fail("Content differ.")
         if not os.path.exists(self.cache_path):
             self.fail("File not stored in local cache.")
-        with open(self.cache_path, "rb") as f:
+        with io.open(self.cache_path, "rb") as f:
             if f.read() != self.content:
                 self.fail("Local cache's content differ " +
                           "from original file.")
@@ -251,7 +268,9 @@ class TestFileCacherBase:
         Then retrieve it as a string.
 
         """
-        self.content = bytes(random.getrandbits(8) for _ in range(100))
+        # We need to wrap the generator in a list because of a
+        # shortcoming of future's bytes implementation.
+        self.content = bytes([random.getrandbits(8) for _ in range(100)])
 
         try:
             data = self.file_cacher.put_file_content(self.content,
@@ -262,7 +281,7 @@ class TestFileCacherBase:
 
         if not os.path.exists(os.path.join(self.cache_base_path, data)):
             self.fail("File not stored in local cache.")
-        with open(os.path.join(self.cache_base_path, data), "rb") as f:
+        with io.open(os.path.join(self.cache_base_path, data), "rb") as f:
             if f.read() != self.content:
                 self.fail("Local cache's content differ "
                           "from original file.")
@@ -271,7 +290,7 @@ class TestFileCacherBase:
 
         # Retrieve the file as a string.
         self.fake_content = b"Fake content.\n"
-        with open(self.cache_path, "wb") as cached_file:
+        with io.open(self.cache_path, "wb") as cached_file:
             cached_file.write(self.fake_content)
         try:
             data = self.file_cacher.get_file_content(self.digest)
@@ -292,7 +311,7 @@ class TestFileCacherBase:
         Then get it back.
 
         """
-        rand_file = RandomFile(10_000_000)
+        rand_file = RandomFile(10000000)
         try:
             data = self.file_cacher.put_file_from_fobj(rand_file, "Test #007")
         except Exception as error:
@@ -361,20 +380,24 @@ class TestFileCacherDB(TestFileCacherBase, DatabaseMixin, unittest.TestCase):
     """Tests for the FileCacher service with a database backend."""
 
     def setUp(self):
-        super().setUp()
+        super(TestFileCacherDB, self).setUp()
         file_cacher = FileCacher()
         self._setUp(file_cacher)
+
+    def tearDown(self):
+        shutil.rmtree(self.cache_base_path, ignore_errors=True)
 
 
 class TestFileCacherFS(TestFileCacherBase, unittest.TestCase):
     """Tests for the FileCacher service with a filesystem backend."""
 
     def setUp(self):
-        super().setUp()
+        super(TestFileCacherFS, self).setUp()
         file_cacher = FileCacher(path="fs-storage")
         self._setUp(file_cacher)
 
     def tearDown(self):
+        shutil.rmtree(self.cache_base_path, ignore_errors=True)
         shutil.rmtree("fs-storage", ignore_errors=True)
 
 

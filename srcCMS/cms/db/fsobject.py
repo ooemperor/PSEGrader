@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2010-2013 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
@@ -23,13 +24,21 @@
 
 """
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+
 import io
+
+from sqlalchemy.schema import Column
+from sqlalchemy.types import String, Unicode
+from sqlalchemy.dialects.postgresql import OID
 
 import psycopg2
 import psycopg2.extensions
-from sqlalchemy.dialects.postgresql import OID
-from sqlalchemy.schema import Column
-from sqlalchemy.types import String, Unicode
 
 from . import Base, custom_psycopg2_connection
 
@@ -103,7 +112,7 @@ class LargeObject(io.RawIOBase):
                                       {'mode': creat_mode},
                                       "Couldn't create large object.", cursor)
             if self.loid == 0:
-                raise OSError("Couldn't create large object.")
+                raise IOError("Couldn't create large object.")
 
         # Open the large object.
         open_mode = (LargeObject.INV_READ if self._readable else 0) | \
@@ -160,7 +169,7 @@ class LargeObject(io.RawIOBase):
             if isinstance(res, int):
                 assert res >= 0
         except (AssertionError, ValueError, psycopg2.DatabaseError):
-            raise OSError(message)
+            raise IOError(message)
         else:
             return res
 

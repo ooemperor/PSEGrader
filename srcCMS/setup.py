@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2010-2013 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
@@ -28,8 +29,17 @@
 
 """
 
-import os
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+# setuptools doesn't seem to like this:
+# from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+
+import io
 import re
+import os
 
 from setuptools import setup, find_packages
 from setuptools.command.build_py import build_py
@@ -44,14 +54,13 @@ PACKAGE_DATA = {
         "admin/static/sh/*.*",
         "admin/templates/*.*",
         "admin/templates/fragments/*.*",
-        "admin/templates/macro/*.*",
+        "admin/templates/views/*.*",
         "contest/static/*.*",
         "contest/static/css/*.*",
         "contest/static/img/*.*",
         "contest/static/img/mimetypes/*.*",
         "contest/static/js/*.*",
         "contest/templates/*.*",
-        "contest/templates/macro/*.*",
     ],
     "cms.service": [
         "templates/printing/*.*",
@@ -94,9 +103,9 @@ PACKAGE_DATA = {
 def find_version():
     """Return the version string obtained from cms/__init__.py"""
     path = os.path.join("cms", "__init__.py")
-    with open(path, "rt", encoding="utf-8") as f:
-        version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
-                                  f.read(), re.M)
+    version_file = io.open(path, "rt", encoding="utf-8").read()
+    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
+                              version_file, re.M)
     if version_match is not None:
         return version_match.group(1)
     raise RuntimeError("Unable to find version string.")
@@ -112,7 +121,8 @@ class build_py_and_l10n(build_py):
         # and compiles a list of data files before run() is called and
         # then stores that value. Hence we need to refresh it.
         self.data_files = self._get_data_files()
-        super().run()
+        # Can't use super here as in Py2 it isn't a new-style class.
+        build_py.run(self)
 
 
 setup(
@@ -151,6 +161,7 @@ setup(
             "cmsAddTestcases=cmscontrib.AddTestcases:main",
             "cmsAddUser=cmscontrib.AddUser:main",
             "cmsCleanFiles=cmscontrib.CleanFiles:main",
+            "cmsComputeComplexity=cmscontrib.ComputeComplexity:main",
             "cmsDumpExporter=cmscontrib.DumpExporter:main",
             "cmsDumpImporter=cmscontrib.DumpImporter:main",
             "cmsDumpUpdater=cmscontrib.DumpUpdater:main",
@@ -183,11 +194,10 @@ setup(
         ],
         "cms.grading.languages": [
             "C++11 / g++=cms.grading.languages.cpp11_gpp:Cpp11Gpp",
-            "C++14 / g++=cms.grading.languages.cpp14_gpp:Cpp14Gpp",
-            "C++17 / g++=cms.grading.languages.cpp17_gpp:Cpp17Gpp",
             "C11 / gcc=cms.grading.languages.c11_gcc:C11Gcc",
             "C# / Mono=cms.grading.languages.csharp_mono:CSharpMono",
             "Haskell / ghc=cms.grading.languages.haskell_ghc:HaskellGhc",
+            "Java 1.4 / gcj=cms.grading.languages.java14_gcj:Java14Gcj",
             "Java / JDK=cms.grading.languages.java_jdk:JavaJDK",
             "Pascal / fpc=cms.grading.languages.pascal_fpc:PascalFpc",
             "PHP=cms.grading.languages.php:Php",
@@ -202,7 +212,8 @@ setup(
         "Development Status :: 5 - Production/Stable",
         "Natural Language :: English",
         "Operating System :: POSIX :: Linux",
-        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3.6",
         "License :: OSI Approved :: "
         "GNU Affero General Public License v3",
     ]

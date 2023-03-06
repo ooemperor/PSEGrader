@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2018 Stefano Maggiolo <s.maggiolo@gmail.com>
@@ -18,9 +19,17 @@
 
 """Tests for the Sum score type."""
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+
 import unittest
 
 from cms.grading.scoretypes.Sum import Sum
+
 from cmstestsuite.unit_tests.grading.scoretypes.scoretypetestutils \
     import ScoreTypeTestMixin
 
@@ -29,7 +38,7 @@ class TestSum(ScoreTypeTestMixin, unittest.TestCase):
     """Test the Sum score type."""
 
     def setUp(self):
-        super().setUp()
+        super(TestSum, self).setUp()
         self._public_testcases = {
             "0": False,
             "1": True,

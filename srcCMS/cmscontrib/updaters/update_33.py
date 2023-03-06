@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2018 Luca Wehrstedt <luca.wehrstedt@gmail.com
@@ -24,6 +25,14 @@ This updater changes the score details so that they provide the score as
 a fraction of the max score rather than in absolute terms.
 
 """
+
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+from six import iterkeys, iteritems
 
 import logging
 
@@ -73,7 +82,7 @@ def is_group_score_details(details):
         if not isinstance(subtask, dict):
             return False
 
-        keys = set(subtask.keys())
+        keys = set(iterkeys(subtask))
         # Whether the subtask exposes all its information, which
         # requires all its testcases to do the same.
         subtask_is_visible = False
@@ -94,7 +103,7 @@ def is_group_score_details(details):
             if not isinstance(testcase, dict):
                 return False
 
-            keys = set(testcase.keys())
+            keys = set(iterkeys(testcase))
 
             if keys == TESTCASE_FULL_KEYS:
                 if testcase["outcome"] not in OUTCOMES \
@@ -169,7 +178,7 @@ def convert_score_details(details):
     return inaccurate
 
 
-class Updater:
+class Updater(object):
 
     def __init__(self, data):
         assert data["_version"] == 32
@@ -179,7 +188,7 @@ class Updater:
         # See convert_score_details.
         inaccurate = False
 
-        for k, v in self.objs.items():
+        for k, v in iteritems(self.objs):
             if k.startswith("_"):
                 continue
 

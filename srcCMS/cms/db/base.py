@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2010-2013 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
@@ -19,18 +20,36 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+from six import iterkeys
+
 import ipaddress
 from datetime import datetime, timedelta
 
-from sqlalchemy.dialects.postgresql import ARRAY, CIDR, JSONB, OID
 from sqlalchemy.ext.declarative import as_declarative
-from sqlalchemy.orm import \
-    class_mapper, object_mapper, ColumnProperty, RelationshipProperty
 from sqlalchemy.orm.exc import ObjectDeletedError
 from sqlalchemy.orm.session import object_session
+from sqlalchemy.orm import \
+    class_mapper, object_mapper, ColumnProperty, RelationshipProperty
 from sqlalchemy.types import \
     Boolean, Integer, Float, String, Unicode, Enum, DateTime, Interval, \
     BigInteger
+from sqlalchemy.dialects.postgresql import ARRAY, CIDR, JSONB, OID
+
+import six
+# In both Python 2 and 3, everything is an object. But in py2 we alias
+# the object name with future.types.newobject.newobject, for which that
+# isn't the case. Here we recover access to the original object type.
+if six.PY3:
+    raw_object = object
+else:
+    import __builtin__
+    raw_object = __builtin__.object
 
 from . import engine, metadata, CastingArray, Codename, Filename, \
     FilenameSchema, FilenameSchemaArray, Digest
@@ -38,29 +57,29 @@ from . import engine, metadata, CastingArray, Codename, Filename, \
 
 _TYPE_MAP = {
     Boolean: bool,
-    Integer: int,
-    BigInteger: int,
-    OID: int,
+    Integer: six.integer_types,
+    BigInteger: six.integer_types,
+    OID: six.integer_types,
     Float: float,
-    Enum: str,
-    Unicode: str,
-    String: str,  # TODO Use bytes.
-    Codename: str,
-    Filename: str,
-    FilenameSchema: str,
-    Digest: str,
+    Enum: six.text_type,
+    Unicode: six.text_type,
+    String: six.string_types,  # TODO Use six.binary_type.
+    Codename: six.text_type,
+    Filename: six.text_type,
+    FilenameSchema: six.text_type,
+    Digest: six.text_type,
     DateTime: datetime,
     Interval: timedelta,
     ARRAY: list,
     CastingArray: list,
     FilenameSchemaArray: list,
     CIDR: (ipaddress.IPv4Network, ipaddress.IPv6Network),
-    JSONB: object,
+    JSONB: raw_object,
 }
 
 
 @as_declarative(bind=engine, metadata=metadata, constructor=None)
-class Base:
+class Base(object):
     """Base class for all classes managed by SQLAlchemy. Extending the
     base class given by SQLAlchemy.
 
@@ -109,7 +128,7 @@ class Base:
                     continue
 
                 # Check that we understand the type
-                if not isinstance(col.type, tuple(_TYPE_MAP.keys())):
+                if not isinstance(col.type, tuple(iterkeys(_TYPE_MAP))):
                     raise RuntimeError(
                         "Unknown SQLAlchemy column type for ColumnProperty "
                         "%s of %s: %s" % (prp.key, cls.__name__, col.type))

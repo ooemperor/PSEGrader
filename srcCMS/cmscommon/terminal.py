@@ -1,8 +1,8 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2015 Luca Versari <veluca93@gmail.com>
-# Copyright © 2018 Luca Chiodini <luca@chiodini.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -17,11 +17,18 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+
 import curses
 import sys
 
 
-class colors:
+class colors(object):
     BLACK = curses.COLOR_BLACK
     RED = curses.COLOR_RED
     GREEN = curses.COLOR_GREEN
@@ -32,7 +39,7 @@ class colors:
     WHITE = curses.COLOR_WHITE
 
 
-class directions:
+class directions(object):
     UP = 1
     DOWN = 2
     LEFT = 3
@@ -59,7 +66,7 @@ def has_color_support(stream):
             # See `man terminfo` for capabilities' names and meanings.
             if curses.tigetnum("colors") > 0:
                 return True
-        # fileno() can raise OSError.
+        # fileno() can raise IOError or OSError (since Python 3.3).
         except Exception:
             pass
     return False
@@ -112,18 +119,17 @@ def move_cursor(direction, amount=1, stream=sys.stdout, erase=False):
     """
     if stream.isatty():
         if direction == directions.UP:
-            print(curses.tparm(curses.tigetstr("cuu"), amount).decode('ascii'),
+            print(curses.tparm(curses.tigetstr("cuu"), amount),
                   file=stream, end='')
         elif direction == directions.DOWN:
-            print(curses.tparm(curses.tigetstr("cud"), amount).decode('ascii'),
+            print(curses.tparm(curses.tigetstr("cud"), amount),
                   file=stream, end='')
         elif direction == directions.LEFT:
-            print(curses.tparm(curses.tigetstr("cub"), amount).decode('ascii'),
+            print(curses.tparm(curses.tigetstr("cub"), amount),
                   file=stream, end='')
         elif direction == directions.RIGHT:
-            print(curses.tparm(curses.tigetstr("cuf"), amount).decode('ascii'),
+            print(curses.tparm(curses.tigetstr("cuf"), amount),
                   file=stream, end='')
         if erase:
-            print(curses.tparm(curses.tigetstr("el")).decode('ascii'),
-                  file=stream, end='')
+            print(curses.tparm(curses.tigetstr("el")), file=stream, end='')
         stream.flush()

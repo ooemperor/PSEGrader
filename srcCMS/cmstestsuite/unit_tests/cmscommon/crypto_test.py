@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2018 Stefano Maggiolo <s.maggiolo@gmail.com>
@@ -17,6 +18,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """Tests for the crypto module"""
+
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+import six
 
 import re
 import unittest
@@ -40,7 +49,7 @@ class TestGetHexRandomKey(unittest.TestCase):
     """Tests for the function get_hex_random_key."""
 
     def test_valid(self):
-        self.assertRegex(get_hex_random_key(), r"^[0-9a-f]*$")
+        six.assertRegex(self, get_hex_random_key(), r"^[0-9a-f]*$")
 
     def test_length(self):
         # Should be 16 bytes.
@@ -51,7 +60,7 @@ class TestEncryptAndDecryptBinary(unittest.TestCase):
     """Tests for the functions encrypt_binary and decrypt_binary."""
 
     def setUp(self):
-        super().setUp()
+        super(TestEncryptAndDecryptBinary, self).setUp()
         self.key = get_hex_random_key()
 
     def test_encrypt_and_decrypt(self):
@@ -65,14 +74,13 @@ class TestEncryptAndDecryptBinary(unittest.TestCase):
             b"")
 
     def test_encrypt_and_decrypt_long(self):
-        value = b"0" * 1_000_000
         self.assertEqual(
-            decrypt_binary(encrypt_binary(value, self.key), self.key),
-            value)
+            decrypt_binary(encrypt_binary(b"0" * 1000000, self.key), self.key),
+            b"0" * 1000000)
 
     def test_encrypt_chaining(self):
         # Even if the input is repeated, the output should not be.
-        encrypted = encrypt_binary(b"0" * 1_000_000, self.key)
+        encrypted = encrypt_binary(b"0" * 1000000, self.key)
         # The output should appear random, so any sequence of 64 bytes is
         # very unlikely to repeat.
         blocks = re.findall(".{64}", encrypted)
@@ -98,7 +106,7 @@ class TestEncryptAndDecryptNumber(unittest.TestCase):
     """Tests for the functions encrypt_number and decrypt_number."""
 
     def setUp(self):
-        super().setUp()
+        super(TestEncryptAndDecryptNumber, self).setUp()
         self.key = get_hex_random_key()
 
     def test_encrypt_and_decrypt(self):
@@ -113,7 +121,7 @@ class TestEncryptAndDecryptNumber(unittest.TestCase):
 
     def test_encrypt_and_decrypt_big(self):
         self.assertEqual(
-            decrypt_number(encrypt_number(10 ** 42, self.key), self.key),
+            decrypt_number(encrypt_number(10**42, self.key), self.key),
             10 ** 42)
 
 
@@ -121,7 +129,7 @@ class TestGenerateRandomPassword(unittest.TestCase):
     """Tests for the function generate_random_password."""
 
     def test_alphabet(self):
-        self.assertRegex(generate_random_password(), r"^[a-z]*$")
+        six.assertRegex(self, generate_random_password(), r"^[a-z]*$")
 
     def test_random(self):
         self.assertNotEqual(generate_random_password(),

@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2012 Bernard Blackham <bernard@largestprime.net>
@@ -22,6 +23,15 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+from six import iteritems
+
+import io
 import json
 import logging
 import re
@@ -39,7 +49,7 @@ from cmstestsuite.web.CWSRequests import \
 logger = logging.getLogger(__name__)
 
 
-class FunctionalTestFramework:
+class FunctionalTestFramework(object):
     """An object encapsulating the status of a functional test
 
     It maintains facilities to interact with the services while running a
@@ -141,7 +151,7 @@ class FunctionalTestFramework:
 
     def get_cms_config(self):
         if self._cms_config is None:
-            with open("%(CONFIG_PATH)s" % CONFIG, "rt", encoding="utf-8") as f:
+            with io.open("%(CONFIG_PATH)s" % CONFIG, "rt") as f:
                 self._cms_config = json.load(f)
         return self._cms_config
 
@@ -230,7 +240,7 @@ class FunctionalTestFramework:
             task_id = int(match_task_id.group(1))
             dataset_id = int(match_dataset_id.group(1))
             edit_args = {}
-            for k, v in kwargs.items():
+            for k, v in iteritems(kwargs):
                 edit_args[k.replace("{{dataset_id}}", str(dataset_id))] = v
             r = self.admin_req('task/%s' % task_id, args=edit_args)
             self.created_tasks[task_id] = kwargs

@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2018 Luca Wehrstedt <luca.wehrstedt@gmail.com>
@@ -17,12 +18,21 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+import six
+
 import io
 import tarfile
 import unittest
 import zipfile
 from collections import namedtuple
-from unittest.mock import patch
+
+from mock import patch
 
 from cms.server.contest.submission import ReceivedFile, InvalidArchive, \
     extract_files_from_archive, extract_files_from_tornado
@@ -39,8 +49,8 @@ class TestExtractFilesFromArchive(unittest.TestCase):
                              compression=zipfile.ZIP_DEFLATED) as f:
             for _, filename, content in files:
                 f.writestr(filename, content)
-        self.assertCountEqual(
-            extract_files_from_archive(archive_data.getvalue()), files)
+        six.assertCountEqual(
+            self, extract_files_from_archive(archive_data.getvalue()), files)
 
     def test_tar_gz(self):
         files = [ReceivedFile(None, "foo.c", b"some content"),
@@ -53,8 +63,8 @@ class TestExtractFilesFromArchive(unittest.TestCase):
                 tarinfo = tarfile.TarInfo(filename)
                 tarinfo.size = len(content)
                 f.addfile(tarinfo, fileobj)
-        self.assertCountEqual(
-            extract_files_from_archive(archive_data.getvalue()), files)
+        six.assertCountEqual(
+            self, extract_files_from_archive(archive_data.getvalue()), files)
 
     def test_failure(self):
         with self.assertRaises(InvalidArchive):
@@ -71,8 +81,8 @@ class TestExtractFilesFromArchive(unittest.TestCase):
             f.writestr("nested/once", b"some other content")
             f.writestr("two/levels/deep", b"more content")
             f.writestr("many/levels/deep", b"moar content")
-        self.assertCountEqual(
-            extract_files_from_archive(archive_data.getvalue()),
+        six.assertCountEqual(
+            self, extract_files_from_archive(archive_data.getvalue()),
             [ReceivedFile(None, "toplevel", b"some content"),
              ReceivedFile(None, "once", b"some other content"),
              ReceivedFile(None, "deep", b"more content"),
@@ -88,8 +98,8 @@ class TestExtractFilesFromArchive(unittest.TestCase):
         archive_data = io.BytesIO()
         with zipfile.ZipFile(archive_data, "w") as f:
             f.writestr("foo\0bar", b"some content")
-        self.assertCountEqual(
-            extract_files_from_archive(archive_data.getvalue()),
+        six.assertCountEqual(
+            self, extract_files_from_archive(archive_data.getvalue()),
             [ReceivedFile(None, "foo", b"some content")])
 
     # The behavior documented in this test actually only happens when
@@ -113,7 +123,7 @@ class TestExtractFilesFromArchive(unittest.TestCase):
         self.assertIsNone(f.codename)
         # The extracted file is named like the temporary file where the
         # archive's contents were copied to, plus a trailing tilde.
-        self.assertRegex(f.filename, "tmp[a-z0-9_]+~")
+        six.assertRegex(self, f.filename, "tmp[a-z0-9_]+~")
         self.assertEqual(f.content, b"some content")
 
     def test_multiple_slashes_are_compressed(self):
@@ -121,8 +131,8 @@ class TestExtractFilesFromArchive(unittest.TestCase):
         archive_data = io.BytesIO()
         with zipfile.ZipFile(archive_data, "w") as f:
             f.writestr("foo//bar", b"some content")
-        self.assertCountEqual(
-            extract_files_from_archive(archive_data.getvalue()),
+        six.assertCountEqual(
+            self, extract_files_from_archive(archive_data.getvalue()),
             [ReceivedFile(None, "bar", b"some content")])
 
     def test_paths_that_might_escape(self):
@@ -133,8 +143,8 @@ class TestExtractFilesFromArchive(unittest.TestCase):
             archive_data = io.BytesIO()
             with zipfile.ZipFile(archive_data, "w") as f:
                 f.writestr(filename, b"some content")
-            self.assertCountEqual(
-                extract_files_from_archive(archive_data.getvalue()),
+            six.assertCountEqual(
+                self, extract_files_from_archive(archive_data.getvalue()),
                 [ReceivedFile(None, "bar", b"some content")])
 
     def test_conflicting_filenames(self):
@@ -157,7 +167,7 @@ MockHTTPFile = namedtuple("MockHTTPFile", ["filename", "body"])
 class TestExtractFilesFromTornado(unittest.TestCase):
 
     def setUp(self):
-        super().setUp()
+        super(TestExtractFilesFromTornado, self).setUp()
 
         patcher = patch(
             "cms.server.contest.submission.file_retrieval"
@@ -175,7 +185,7 @@ class TestExtractFilesFromTornado(unittest.TestCase):
                        MockHTTPFile("bar.cxx", b"the same file in C++")],
             # Make sure that empty lists have no effect.
             "baz": []}
-        self.assertCountEqual(extract_files_from_tornado(tornado_files), [
+        six.assertCountEqual(self, extract_files_from_tornado(tornado_files), [
             ReceivedFile("foo.%l", "foo.py", b"some python stuff"),
             ReceivedFile("bar.%l", "bar.c", b"one file in C"),
             ReceivedFile("bar.%l", "bar.cxx", b"the same file in C++")])
@@ -184,7 +194,7 @@ class TestExtractFilesFromTornado(unittest.TestCase):
         tornado_files = {
             "submission": [MockHTTPFile("sub.zip", b"this is an archive")],
             "foo.%l": [MockHTTPFile("foo.c", b"this is something else")]}
-        self.assertCountEqual(extract_files_from_tornado(tornado_files), [
+        six.assertCountEqual(self, extract_files_from_tornado(tornado_files), [
             ReceivedFile("submission", "sub.zip", b"this is an archive"),
             ReceivedFile("foo.%l", "foo.c", b"this is something else")])
 
@@ -192,7 +202,7 @@ class TestExtractFilesFromTornado(unittest.TestCase):
         tornado_files = {
             "submission": [MockHTTPFile("sub.zip", b"this is an archive"),
                            MockHTTPFile("sub2.zip", b"this is another one")]}
-        self.assertCountEqual(extract_files_from_tornado(tornado_files), [
+        six.assertCountEqual(self, extract_files_from_tornado(tornado_files), [
             ReceivedFile("submission", "sub.zip", b"this is an archive"),
             ReceivedFile("submission", "sub2.zip", b"this is another one")])
 

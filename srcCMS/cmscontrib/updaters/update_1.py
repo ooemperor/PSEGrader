@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2013 Luca Wehrstedt <luca.wehrstedt@gmail.com>
@@ -25,10 +26,18 @@ db4adada08d66b4797d0569d95e8f0c028a4e5e0.
 
 """
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+from six import iteritems
+
 from functools import partial
 
 
-class Updater:
+class Updater(object):
 
     def __init__(self, data):
         self.data = data
@@ -51,7 +60,7 @@ class Updater:
             item_id = fun(item)
             if num:
                 self.objs[item_id]['num'] = i
-            for k, v in kwargs.items():
+            for k, v in iteritems(kwargs):
                 self.objs[item_id][k] = v
             ret.append(item_id)
         return ret
@@ -60,7 +69,7 @@ class Updater:
         ret = dict()
         for item in list_:
             item_id = fun(item)
-            for k, v in kwargs.items():
+            for k, v in iteritems(kwargs):
                 self.objs[item_id][k] = v
             ret[item[key]] = item_id
         return ret

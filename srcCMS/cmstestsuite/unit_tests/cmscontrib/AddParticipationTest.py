@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2018 Stefano Maggiolo <s.maggiolo@gmail.com>
@@ -18,6 +19,14 @@
 
 """Tests for the AddParticipation script"""
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+from six import assertCountEqual
+
 import ipaddress
 import unittest
 
@@ -25,14 +34,16 @@ import unittest
 from cmstestsuite.unit_tests.databasemixin import DatabaseMixin
 
 from cms.db import Participation
+
 from cmscommon.crypto import validate_password
+
 from cmscontrib.AddParticipation import add_participation
 
 
 class TestAddParticipation(DatabaseMixin, unittest.TestCase):
 
     def setUp(self):
-        super().setUp()
+        super(TestAddParticipation, self).setUp()
         self.contest = self.add_contest()
         self.user = self.add_user()
         self.team = self.add_team()
@@ -40,7 +51,7 @@ class TestAddParticipation(DatabaseMixin, unittest.TestCase):
 
     def tearDown(self):
         self.delete_data()
-        super().tearDown()
+        super(TestAddParticipation, self).tearDown()
 
     def assertParticipationInDb(self, user_id, contest_id, password,
                                 delay_time=0, extra_time=0,
@@ -58,7 +69,7 @@ class TestAddParticipation(DatabaseMixin, unittest.TestCase):
         if ip is None:
             self.assertIsNone(p.ip)
         else:
-            self.assertCountEqual(p.ip, ip)
+            assertCountEqual(self, p.ip, ip)
         if team_code is None:
             self.assertIsNone(p.team)
         else:

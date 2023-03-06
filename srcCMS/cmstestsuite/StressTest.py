@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2010-2012 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
@@ -21,18 +22,28 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+from six import iterkeys, iteritems
+
 import argparse
 import ast
+import io
 import os
-import random
 import sys
 import threading
+import random
 import time
 
-import cmstestsuite.web
 from cms import config, ServiceCoord, get_service_address, utf8_decoder
 from cms.db import Contest, SessionGen
 from cmscommon.crypto import parse_authentication
+
+import cmstestsuite.web
 from cmstestsuite.web import Browser
 from cmstestsuite.web.CWSRequests import HomepageRequest, CWSLoginRequest, \
     TaskRequest, TaskStatementRequest, SubmitRandomRequest
@@ -41,7 +52,7 @@ from cmstestsuite.web.CWSRequests import HomepageRequest, CWSLoginRequest, \
 cmstestsuite.web.debug = True
 
 
-class RequestLog:
+class RequestLog(object):
 
     def __init__(self, log_dir=None):
         self.total = 0
@@ -87,7 +98,7 @@ class RequestLog:
                                   request.__class__.__name__)
         filepath = os.path.join(self.log_dir, filename)
         linkpath = os.path.join(self.log_dir, request.__class__.__name__)
-        with open(filepath, 'wt', encoding='utf-8') as fd:
+        with io.open(filepath, 'wt', encoding='utf-8') as fd:
             request.store_to_file(fd)
         try:
             os.remove(linkpath)
@@ -275,7 +286,7 @@ def harvest_contest_data(contest_id):
                 continue
             users[user.username] = {'password': password}
         for task in contest.tasks:
-            tasks.append((task.id, task.name, list(task.statements.keys())))
+            tasks.append((task.id, task.name, list(iterkeys(task.statements))))
     return users, tasks
 
 
@@ -322,7 +333,7 @@ def main():
         contest_data = dict()
         contest_data['users'] = users
         contest_data['tasks'] = tasks
-        with open(args.prepare_path, "wt", encoding="utf-8") as file_:
+        with io.open(args.prepare_path, "wt", encoding="utf-8") as file_:
             file_.write("%s" % contest_data)
         return
 
@@ -337,7 +348,7 @@ def main():
     if args.read_from is None:
         users, tasks = harvest_contest_data(args.contest_id)
     else:
-        with open(args.read_from, "rt", encoding="utf-8") as file_:
+        with io.open(args.read_from, "rt", encoding="utf-8") as file_:
             contest_data = ast.literal_eval(file_.read())
         users = contest_data['users']
         tasks = contest_data['tasks']
@@ -347,7 +358,7 @@ def main():
         return
 
     if args.actor_num is not None:
-        user_items = list(users.items())
+        user_items = list(iteritems(users))
         if args.sort_actors:
             user_items.sort()
         else:
@@ -373,7 +384,7 @@ def main():
                                                               username)),
                           base_url=base_url,
                           submissions_path=args.submissions_path)
-              for username, data in users.items()]
+              for username, data in iteritems(users)]
     for actor in actors:
         actor.start()
 

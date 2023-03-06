@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2018 Luca Wehrstedt <luca.wehrstedt@gmail.com>
@@ -16,9 +17,17 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+
 import unittest
 from datetime import timedelta
-from unittest.mock import call, patch
+
+from mock import call, patch
 
 # Needs to be first to allow for monkey patching the DB connection string.
 from cmstestsuite.unit_tests.databasemixin import DatabaseMixin
@@ -32,7 +41,7 @@ from cmscommon.datetime import make_datetime
 class TestGetSubmissionCount(DatabaseMixin, unittest.TestCase):
 
     def setUp(self):
-        super().setUp()
+        super(TestGetSubmissionCount, self).setUp()
         self.contest = self.add_contest()
         self.task1 = self.add_task(contest=self.contest)
         self.task2 = self.add_task(contest=self.contest)
@@ -143,7 +152,7 @@ class TestGetSubmissionCount(DatabaseMixin, unittest.TestCase):
 class TestCheckMaxNumber(DatabaseMixin, unittest.TestCase):
 
     def setUp(self):
-        super().setUp()
+        super(TestCheckMaxNumber, self).setUp()
 
         patcher = patch(
             "cms.server.contest.submission.check.get_submission_count")
@@ -203,7 +212,7 @@ class TestCheckMaxNumber(DatabaseMixin, unittest.TestCase):
 class TestGetLatestSubmission(DatabaseMixin, unittest.TestCase):
 
     def setUp(self):
-        super().setUp()
+        super(TestGetLatestSubmission, self).setUp()
         self.contest = self.add_contest()
         self.task1 = self.add_task(contest=self.contest)
         self.task2 = self.add_task(contest=self.contest)
@@ -322,7 +331,7 @@ class TestGetLatestSubmission(DatabaseMixin, unittest.TestCase):
 class TestCheckMinInterval(DatabaseMixin, unittest.TestCase):
 
     def setUp(self):
-        super().setUp()
+        super(TestCheckMinInterval, self).setUp()
 
         patcher = \
             patch("cms.server.contest.submission.check.get_latest_submission")

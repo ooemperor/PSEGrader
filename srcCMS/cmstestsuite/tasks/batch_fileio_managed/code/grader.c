@@ -1,7 +1,5 @@
 #include <stdio.h>
 
-#include "task.h"
-
 extern int userfunc(int x);
 
 int main() {

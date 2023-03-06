@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2015-2018 Stefano Maggiolo <s.maggiolo@gmail.com>
@@ -35,10 +36,17 @@ same regardless of the path used to reach it.
 
 """
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+from six import itervalues
+
 from datetime import timedelta
 
 import cms
-
 
 # Monkeypatch the db string.
 # Noqa to avoid complaints due to imports after a statement.
@@ -54,7 +62,7 @@ from cmstestsuite.unit_tests.testidgenerator import unique_long_id, \
     unique_unicode_id, unique_digest
 
 
-class DatabaseObjectGeneratorMixin:
+class DatabaseObjectGeneratorMixin(object):
     """Mixin to create database objects without a session.
 
     This is to be preferred to DatabaseMixin when a session is not required, in
@@ -260,7 +268,7 @@ class DatabaseMixin(DatabaseObjectGeneratorMixin):
 
     @classmethod
     def setUpClass(cls):
-        super().setUpClass()
+        super(DatabaseMixin, cls).setUpClass()
         assert "fortesting" in str(engine), \
             "Monkey patching of DB connection string failed"
         drop_db()
@@ -269,15 +277,15 @@ class DatabaseMixin(DatabaseObjectGeneratorMixin):
     @classmethod
     def tearDownClass(cls):
         drop_db()
-        super().tearDownClass()
+        super(DatabaseMixin, cls).tearDownClass()
 
     def setUp(self):
-        super().setUp()
+        super(DatabaseMixin, self).setUp()
         self.session = Session()
 
     def tearDown(self):
         self.session.rollback()
-        super().tearDown()
+        super(DatabaseMixin, self).tearDown()
 
     def delete_data(self):
         """Delete all the data in the DB.
@@ -286,7 +294,7 @@ class DatabaseMixin(DatabaseObjectGeneratorMixin):
         starting from a clean DB.
 
         """
-        for table in metadata.tables.values():
+        for table in itervalues(metadata.tables):
             self.session.execute(table.delete())
         self.session.commit()
 

@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2010-2015 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
@@ -19,6 +20,14 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+from six import iteritems, with_metaclass
+
 import io
 import logging
 import os
@@ -26,7 +35,6 @@ import resource
 import select
 import stat
 import tempfile
-import time
 from abc import ABCMeta, abstractmethod
 from functools import wraps, partial
 
@@ -35,6 +43,7 @@ from gevent import subprocess
 
 from cms import config, rmtree
 from cmscommon.commands import pretty_print_cmdline
+from cmscommon.datetime import monotonic_time
 
 
 logger = logging.getLogger(__name__)
@@ -100,7 +109,7 @@ def wait_without_std(procs):
     while len(to_consume) > 0:
         to_read = select.select(to_consume, [], [], 1.0)[0]
         for file_ in to_read:
-            file_.read(8 * 1024)
+            file_.read(8192)
         to_consume = get_to_consume()
 
     return [process.wait() for process in procs]
@@ -173,7 +182,7 @@ class Truncator(io.RawIOBase):
         raise io.UnsupportedOperation('write')
 
 
-class SandboxBase(metaclass=ABCMeta):
+class SandboxBase(with_metaclass(ABCMeta, object)):
     """A base class for all sandboxes, meant to contain common
     resources.
 
@@ -345,7 +354,7 @@ class SandboxBase(metaclass=ABCMeta):
         real_path = self.relative_path(path)
         try:
             file_fd = os.open(real_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
-            file_ = open(file_fd, "wb")
+            file_ = io.open(file_fd, "wb")
         except OSError as e:
             logger.error("Failed create file %s in sandbox. Unable to "
                          "evalulate this submission. This may be due to "
@@ -391,7 +400,7 @@ class SandboxBase(metaclass=ABCMeta):
         """
         logger.debug("Retrieving file %s from sandbox.", path)
         real_path = self.relative_path(path)
-        file_ = open(real_path, "rb")
+        file_ = io.open(real_path, "rb")
         if trunc_len is not None:
             file_ = Truncator(file_, trunc_len)
         return file_
@@ -410,7 +419,7 @@ class SandboxBase(metaclass=ABCMeta):
         """
         logger.debug("Retrieving text file %s from sandbox.", path)
         real_path = self.relative_path(path)
-        file_ = open(real_path, "rt", encoding="utf-8")
+        file_ = io.open(real_path, "rt", encoding="utf-8")
         if trunc_len is not None:
             file_ = Truncator(file_, trunc_len)
         return file_
@@ -594,7 +603,7 @@ class StupidSandbox(SandboxBase):
         if self.exec_time:
             return self.exec_time
         if self.popen_time:
-            self.exec_time = time.monotonic() - self.popen_time
+            self.exec_time = monotonic_time() - self.popen_time
             return self.exec_time
         return None
 
@@ -681,8 +690,7 @@ class StupidSandbox(SandboxBase):
 
         logger.debug("Executing program in sandbox with command: `%s'.",
                      " ".join(command))
-        with open(self.relative_path(self.cmd_file),
-                  'at', encoding="utf-8") as commands:
+        with io.open(self.relative_path(self.cmd_file), 'at') as commands:
             commands.write("%s\n" % (pretty_print_cmdline(command)))
         try:
             p = subprocess.Popen(command,
@@ -731,12 +739,12 @@ class StupidSandbox(SandboxBase):
                                    (rlimit_cpu, rlimit_cpu))
 
             if self.address_space:
-                rlimit_data = self.address_space
+                rlimit_data = int(self.address_space * 1024)
                 resource.setrlimit(resource.RLIMIT_DATA,
                                    (rlimit_data, rlimit_data))
 
             if self.stack_space:
-                rlimit_stack = self.stack_space
+                rlimit_stack = int(self.stack_space * 1024)
                 resource.setrlimit(resource.RLIMIT_STACK,
                                    (rlimit_stack, rlimit_stack))
 
@@ -765,7 +773,7 @@ class StupidSandbox(SandboxBase):
             stderr_fd = subprocess.PIPE
 
         # Note down execution time
-        self.popen_time = time.monotonic()
+        self.popen_time = monotonic_time()
 
         # Actually call the Popen
         self.popen = self._popen(command,
@@ -928,11 +936,6 @@ class IsolateSandbox(SandboxBase):
         # symlink to one out of many alternatives.
         self.maybe_add_mapped_directory("/etc/alternatives")
 
-        # Likewise, needed by C# programs. The Mono runtime looks in
-        # /etc/mono/config to obtain the default DllMap, which includes, in
-        # particular, the System.Native assembly.
-        self.maybe_add_mapped_directory("/etc/mono", options="noexec")
-
         # Tell isolate to get the sandbox ready. We do our best to cleanup
         # after ourselves, but we might have missed something if a previous
         # worker was interrupted in the middle of an execution, so we issue an
@@ -1000,8 +1003,8 @@ class IsolateSandbox(SandboxBase):
                 os.path.realpath(os.path.join(self._home_dest, inner_path))
             # If an inner path is absolute (e.g., /fifo0/u0_to_m) then
             # it may be outside home and we should ignore it.
-            if os.path.commonpath([abs_inner_path,
-                                   self._home_dest]) != self._home_dest:
+            # FIXME: In Py3 use os.path.commonpath.
+            if not abs_inner_path.startswith(self._home_dest + "/"):
                 continue
             rel_inner_path = os.path.relpath(abs_inner_path, self._home_dest)
             outer_path = os.path.join(self._home, rel_inner_path)
@@ -1011,7 +1014,7 @@ class IsolateSandbox(SandboxBase):
         # assign the correct permissions.
         for path in outer_paths:
             if not os.path.exists(path):
-                open(path, "wb").close()
+                io.open(path, "wb").close()
 
         # Close everything, then open only the specified.
         self.allow_writing_none()
@@ -1088,22 +1091,19 @@ class IsolateSandbox(SandboxBase):
             res += ["--full-env"]
         for var in self.inherit_env:
             res += ["--env=%s" % var]
-        for var, value in self.set_env.items():
+        for var, value in iteritems(self.set_env):
             res += ["--env=%s=%s" % (var, value)]
         if self.fsize is not None:
-            # Isolate wants file size as KiB.
-            res += ["--fsize=%d" % (self.fsize // 1024)]
+            res += ["--fsize=%d" % self.fsize]
         if self.stdin_file is not None:
             res += ["--stdin=%s" % self.inner_absolute_path(self.stdin_file)]
         if self.stack_space is not None:
-            # Isolate wants stack size as KiB.
-            res += ["--stack=%d" % (self.stack_space // 1024)]
+            res += ["--stack=%d" % self.stack_space]
         if self.address_space is not None:
-            # Isolate wants memory size as KiB.
             if self.cgroup:
-                res += ["--cg-mem=%d" % (self.address_space // 1024)]
+                res += ["--cg-mem=%d" % self.address_space]
             else:
-                res += ["--mem=%d" % (self.address_space // 1024)]
+                res += ["--mem=%d" % self.address_space]
         if self.stdout_file is not None:
             res += ["--stdout=%s" % self.inner_absolute_path(self.stdout_file)]
         if self.max_processes is not None:
@@ -1142,8 +1142,8 @@ class IsolateSandbox(SandboxBase):
                         self.log[key].append(value)
                     else:
                         self.log[key] = [value]
-        except OSError as error:
-            raise OSError("Error while reading execution log file %s. %r" %
+        except IOError as error:
+            raise IOError("Error while reading execution log file %s. %r" %
                           (info_file, error))
 
     @with_log
@@ -1179,7 +1179,6 @@ class IsolateSandbox(SandboxBase):
 
         """
         if 'cg-mem' in self.log:
-            # Isolate returns memory measurements in KiB.
             return int(self.log['cg-mem'][0]) * 1024
         return None
 
@@ -1305,7 +1304,7 @@ class IsolateSandbox(SandboxBase):
             try:
                 prev_permissions = stat.S_IMODE(os.stat(self._home).st_mode)
                 os.chmod(self._home, 0o700)
-                with open(self.cmd_file, 'at', encoding="utf-8") as cmds:
+                with io.open(self.cmd_file, 'at') as cmds:
                     cmds.write("%s\n" % (pretty_print_cmdline(command)))
                 p = subprocess.Popen(command, cwd=self._home,
                                      stdin=stdin, stdout=stdout, stderr=stderr,
@@ -1315,8 +1314,10 @@ class IsolateSandbox(SandboxBase):
                 # is not forwarded to the contestants. Secure commands
                 # are "setup" commands, which should not fail or
                 # provide information for the contestants.
-                open(os.path.join(self._home, self.stdout_file), "wb").close()
-                open(os.path.join(self._home, self.stderr_file), "wb").close()
+                io.open(
+                    os.path.join(self._home, self.stdout_file), "wb").close()
+                io.open(
+                    os.path.join(self._home, self.stderr_file), "wb").close()
                 self._write_empty_run_log(self.exec_num)
             except OSError:
                 logger.critical(
@@ -1331,7 +1332,7 @@ class IsolateSandbox(SandboxBase):
         # Temporarily allow writing new files.
         prev_permissions = stat.S_IMODE(os.stat(self._home).st_mode)
         os.chmod(self._home, 0o770)
-        with open(self.cmd_file, 'at', encoding="utf-8") as commands:
+        with io.open(self.cmd_file, 'at') as commands:
             commands.write("%s\n" % (pretty_print_cmdline(args)))
         os.chmod(self._home, prev_permissions)
         try:
@@ -1349,7 +1350,7 @@ class IsolateSandbox(SandboxBase):
     def _write_empty_run_log(self, index):
         """Write a fake run.log file with no information."""
         info_file = "%s.%d" % (self.info_basename, index)
-        with open(info_file, "wt", encoding="utf-8") as f:
+        with io.open(info_file, "wt", encoding="utf-8") as f:
             f.write("time:0.000\n")
             f.write("time-wall:0.000\n")
             f.write("max-rss:0\n")
@@ -1412,11 +1413,11 @@ class IsolateSandbox(SandboxBase):
             [self.box_exec]
             + (["--cg"] if self.cgroup else [])
             + ["--box-id=%d" % self.box_id, "--init"])
-        try:
-            subprocess.check_call(init_cmd)
-        except subprocess.CalledProcessError as e:
+        ret = subprocess.call(init_cmd)
+        if ret != 0:
             raise SandboxInterfaceException(
-                "Failed to initialize sandbox") from e
+                "Failed to initialize sandbox with command: %s "
+                "(error %d)" % (pretty_print_cmdline(init_cmd), ret))
 
     def cleanup(self, delete=False):
         """See Sandbox.cleanup()."""
@@ -1431,24 +1432,24 @@ class IsolateSandbox(SandboxBase):
             + (["--cg"] if self.cgroup else []) \
             + ["--box-id=%d" % self.box_id]
 
-        if delete:
-            # Ignore exit status as some files may be owned by our user
-            subprocess.call(
-                exe + [
-                    "--dir=%s=%s:rw" % (self._home_dest, self._home),
-                    "--run", "--",
-                    "/bin/chmod", "777", "-R", self._home_dest],
-                stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+        # Use subprocess.DEVNULL when dropping Python 2.
+        with io.open(os.devnull, "r+b") as devnull:
+            if delete:
+                subprocess.call(
+                    exe + [
+                        "--dir=%s=%s:rw" % (self._home_dest, self._home),
+                        "--run", "--",
+                        "/bin/chmod", "777", "-R", self._home_dest],
+                    stdout=devnull, stderr=devnull)
 
-        # Tell isolate to cleanup the sandbox.
-        subprocess.check_call(
-            exe + ["--cleanup"],
-            stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+            # Tell isolate to cleanup the sandbox.
+            subprocess.call(exe + ["--cleanup"],
+                            stdout=devnull, stderr=subprocess.STDOUT)
 
-        if delete:
-            logger.debug("Deleting sandbox in %s.", self._outer_dir)
-            # Delete the working directory.
-            rmtree(self._outer_dir)
+            if delete:
+                logger.debug("Deleting sandbox in %s.", self._outer_dir)
+                # Delete the working directory.
+                rmtree(self._outer_dir)
 
 
 Sandbox = {

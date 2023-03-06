@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2013-2016 Luca Wehrstedt <luca.wehrstedt@gmail.com>
@@ -17,13 +18,20 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+
 import json
 import logging
 
+from werkzeug.wrappers import Request, Response
+from werkzeug.routing import Map, Rule
 from werkzeug.exceptions import HTTPException, BadRequest, Forbidden, \
     NotFound, NotAcceptable, UnsupportedMediaType, ServiceUnavailable
-from werkzeug.routing import Map, Rule
-from werkzeug.wrappers import Request, Response
 from werkzeug.wsgi import responder
 
 from cms import ServiceCoord
@@ -32,7 +40,7 @@ from cms import ServiceCoord
 logger = logging.getLogger(__name__)
 
 
-class RPCMiddleware:
+class RPCMiddleware(object):
     """An HTTP interface to the internal RPC communications.
 
     This WSGI application provides a synchronous and unfiltered access,

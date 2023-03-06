@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2018 Stefano Maggiolo <s.maggiolo@gmail.com>
@@ -18,8 +19,17 @@
 
 """Tests for the trusted step."""
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+from six import PY2
+
 import unittest
-from unittest.mock import ANY, MagicMock, call, patch
+
+from mock import ANY, MagicMock, call, patch
 
 from cms.grading.Sandbox import Sandbox
 from cms.grading.steps import extract_outcome_and_text, trusted_step, \
@@ -39,7 +49,7 @@ TWO_COMMANDS = [["test", "command", "1"], ["command", "2"]]
 class TestExtractOutcomeAndText(unittest.TestCase):
 
     def setUp(self):
-        super().setUp()
+        super(TestExtractOutcomeAndText, self).setUp()
         self.sandbox = FakeIsolateSandbox(None)
         self.sandbox.stdout_file = "o"
         self.sandbox.stderr_file = "e"
@@ -91,6 +101,7 @@ class TestExtractOutcomeAndText(unittest.TestCase):
         with self.assertRaises(ValueError):
             extract_outcome_and_text(self.sandbox)
 
+    @unittest.skipIf(PY2, "Python 2 does not have FileNotFoundError.")
     def test_failure_missing_file(self):
         self.sandbox.fake_file("o", b"0.45\n")
         with self.assertRaises(FileNotFoundError):
@@ -100,7 +111,7 @@ class TestExtractOutcomeAndText(unittest.TestCase):
 class TestTrustedStep(unittest.TestCase):
 
     def setUp(self):
-        super().setUp()
+        super(TestTrustedStep, self).setUp()
         self.sandbox = FakeIsolateSandbox(None)
 
         patcher = patch("cms.grading.steps.trusted.logger.error",
@@ -226,7 +237,7 @@ class TestTrustedStep(unittest.TestCase):
 class TestCheckerStep(unittest.TestCase):
 
     def setUp(self):
-        super().setUp()
+        super(TestCheckerStep, self).setUp()
         # By default, any file request succeeds.
         self.file_cacher = MagicMock()
         self.sandbox = FakeIsolateSandbox(self.file_cacher)

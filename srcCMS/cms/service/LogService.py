@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2010-2012 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
@@ -23,14 +24,21 @@
 
 """
 
-import logging
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+
 import os
 import time
+import logging
 from collections import deque
 
 from cms import config, mkdir
-from cms.io import Service, rpc_method
 from cms.log import root_logger, shell_handler, FileHandler, DetailedFormatter
+from cms.io import Service, rpc_method
 
 
 logger = logging.getLogger(__name__)

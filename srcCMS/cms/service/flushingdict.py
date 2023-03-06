@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2016 Stefano Maggiolo <s.maggiolo@gmail.com>
@@ -17,17 +18,26 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+from six import iteritems
+
 import logging
-import time
 
 import gevent
 from gevent.lock import RLock
+
+from cmscommon.datetime import monotonic_time
 
 
 logger = logging.getLogger(__name__)
 
 
-class FlushingDict:
+class FlushingDict(object):
     """A dict that periodically flushes its content to a callback.
 
     The dict flushes after a specified time since the latest entry
@@ -65,20 +75,20 @@ class FlushingDict:
         self.d_lock = RLock()
 
         # Time when an item was last inserted in the dict
-        self.last_insert = time.monotonic()
+        self.last_insert = monotonic_time()
 
     def add(self, key, value):
         logger.debug("Adding item %s", key)
         with self.d_lock:
             self.d[key] = value
-            self.last_insert = time.monotonic()
+            self.last_insert = monotonic_time()
 
     def flush(self):
         logger.debug("Flushing items")
         with self.d_lock:
             self.fd = self.d
             self.d = dict()
-        self.callback(list(self.fd.items()))
+        self.callback(list(iteritems(self.fd)))
         self.fd = dict()
 
     def __contains__(self, key):
@@ -89,7 +99,7 @@ class FlushingDict:
         while True:
             while True:
                 with self.d_lock:
-                    since_last_insert = time.monotonic() - self.last_insert
+                    since_last_insert = monotonic_time() - self.last_insert
                     if len(self.d) != 0 and (
                             len(self.d) >= self.size or
                             since_last_insert > self.flush_latency_seconds):

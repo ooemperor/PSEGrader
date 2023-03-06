@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2012 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
@@ -33,6 +34,14 @@ testcase".
 
 """
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+from six import itervalues, iteritems
+
 import logging
 
 from cms.db import Dataset, Evaluation, Executable, File, Manager, Submission, \
@@ -58,7 +67,7 @@ def _is_contest_multithreaded(contest):
                for l in contest.languages)
 
 
-class Job:
+class Job(object):
     """Base class for all jobs.
 
     Input data (usually filled by ES): task_type,
@@ -148,11 +157,11 @@ class Job:
             'success': self.success,
             'text': self.text,
             'files': dict((k, v.digest)
-                          for k, v in self.files.items()),
+                          for k, v in iteritems(self.files)),
             'managers': dict((k, v.digest)
-                             for k, v in self.managers.items()),
+                             for k, v in iteritems(self.managers)),
             'executables': dict((k, v.digest)
-                                for k, v in self.executables.items()),
+                                for k, v in iteritems(self.executables)),
             }
         return res
 
@@ -183,11 +192,11 @@ class Job:
         if data['operation'] is not None:
             data['operation'] = ESOperation.from_dict(data['operation'])
         data['files'] = dict(
-            (k, File(k, v)) for k, v in data['files'].items())
+            (k, File(k, v)) for k, v in iteritems(data['files']))
         data['managers'] = dict(
-            (k, Manager(k, v)) for k, v in data['managers'].items())
+            (k, Manager(k, v)) for k, v in iteritems(data['managers']))
         data['executables'] = dict(
-            (k, Executable(k, v)) for k, v in data['executables'].items())
+            (k, Executable(k, v)) for k, v in iteritems(data['executables']))
         return cls(**data)
 
     @staticmethod
@@ -332,7 +341,7 @@ class CompilationJob(Job):
         sr.compilation_memory = self.plus.get('execution_memory')
         sr.compilation_shard = self.shard
         sr.compilation_sandbox = ":".join(self.sandboxes)
-        for executable in self.executables.values():
+        for executable in itervalues(self.executables):
             sr.executables.set(executable)
 
     @staticmethod
@@ -378,15 +387,6 @@ class CompilationJob(Job):
                     managers[manager_filename] = \
                         dataset.managers[manager_filename]
 
-        # Copy header files from dataset.
-        # FIXME This bypasses get_auto_managers() logic
-        if language is not None:
-            for manager_filename in dataset.managers:
-                if any(manager_filename.endswith(header)
-                       for header in language.header_extensions):
-                    managers[manager_filename] = \
-                        dataset.managers[manager_filename]
-
         return CompilationJob(
             operation=operation,
             task_type=dataset.task_type,
@@ -420,7 +420,7 @@ class CompilationJob(Job):
         ur.compilation_memory = self.plus.get('execution_memory')
         ur.compilation_shard = self.shard
         ur.compilation_sandbox = ":".join(self.sandboxes)
-        for executable in self.executables.values():
+        for executable in itervalues(self.executables):
             u_executable = UserTestExecutable(
                 executable.filename, executable.digest)
             ur.executables.set(u_executable)
@@ -652,7 +652,7 @@ class EvaluationJob(Job):
         ur.output = self.user_output
 
 
-class JobGroup:
+class JobGroup(object):
     """A simple collection of jobs."""
 
     def __init__(self, jobs=None):

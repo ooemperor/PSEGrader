@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2018 Stefano Maggiolo <s.maggiolo@gmail.com>
@@ -18,15 +19,24 @@
 
 """Tests for the AddStatement script"""
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+
 import unittest
 
 # Needs to be first to allow for monkey patching the DB connection string.
 from cmstestsuite.unit_tests.databasemixin import DatabaseMixin
+from cmstestsuite.unit_tests.filesystemmixin import FileSystemMixin
 
 from cms.db import Statement
+
 from cmscommon.digest import bytes_digest
+
 from cmscontrib.AddStatement import add_statement
-from cmstestsuite.unit_tests.filesystemmixin import FileSystemMixin
 
 
 _CONTENT_1 = b"this is a pdf"
@@ -38,14 +48,14 @@ _DIGEST_2 = bytes_digest(_CONTENT_2)
 class TestAddStatement(DatabaseMixin, FileSystemMixin, unittest.TestCase):
 
     def setUp(self):
-        super().setUp()
+        super(TestAddStatement, self).setUp()
 
         self.task = self.add_task()
         self.session.commit()
 
     def tearDown(self):
         self.delete_data()
-        super().tearDown()
+        super(TestAddStatement, self).tearDown()
 
     def assertStatementInDb(self, language, digest):
         """Assert that the statement with the given data is in the DB."""

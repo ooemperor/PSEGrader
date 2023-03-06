@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2010-2012 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
@@ -29,13 +30,21 @@ compilation and the evaluation are contained in the task type class.
 
 """
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+from six import with_metaclass
+
 import re
 from abc import ABCMeta, abstractmethod
 
 from cms.grading.Job import CompilationJob, EvaluationJob
 
 
-class TaskType(metaclass=ABCMeta):
+class TaskType(with_metaclass(ABCMeta, object)):
     """Base class with common operation that (more or less) all task
     types must do sometimes.
 

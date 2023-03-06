@@ -1,5 +1,3 @@
-{% import "macro/reevaluation_buttons.html" as macro_reevaluation_buttons %}
-
 {% extends "base.html" %}
 
 {% block js_init %}
@@ -52,8 +50,7 @@ below, and wait for it to complete.
 
 <p>
     Reevaluate all submissions for the dataset "{{ dataset.description }}":
-    {{ macro_reevaluation_buttons.reevaluation_buttons(
-           admin.permission_all,
+    {{ ReevaluationButtons(
            url("dataset", dataset.id),
            dataset_id=dataset.id) }}
 </p>

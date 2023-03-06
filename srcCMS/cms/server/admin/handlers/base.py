@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2010-2013 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
@@ -27,17 +28,23 @@
 
 """
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+
 import ipaddress
 import json
 import logging
 import traceback
+
 from datetime import datetime, timedelta
 from functools import wraps
 
-try:
-    import tornado4.web as tornado_web
-except ImportError:
-    import tornado.web as tornado_web
+import tornado.web
+
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import subqueryload
 
@@ -47,8 +54,8 @@ from cms.db import Admin, Contest, Participation, Question, Submission, \
 from cms.grading.scoretypes import get_score_type_class
 from cms.grading.tasktypes import get_task_type_class
 from cms.server import CommonRequestHandler, FileHandlerMixin
-from cmscommon.crypto import hash_password, parse_authentication
 from cmscommon.datetime import make_datetime
+from cmscommon.crypto import hash_password, parse_authentication
 
 
 logger = logging.getLogger(__name__)
@@ -167,7 +174,7 @@ def require_permission(permission="authenticated", self_allowed=False):
 
         """
         @wraps(func)
-        @tornado_web.authenticated
+        @tornado.web.authenticated
         def newfunc(self, *args, **kwargs):
             """Check if the permission is present before calling the function.
 
@@ -186,7 +193,7 @@ def require_permission(permission="authenticated", self_allowed=False):
                     # the current user id.
                     return func(self, *args, **kwargs)
                 else:
-                    raise tornado_web.HTTPError(403, "Admin is not authorized")
+                    raise tornado.web.HTTPError(403, "Admin is not authorized")
 
         return newfunc
 
@@ -269,14 +276,14 @@ class BaseHandler(CommonRequestHandler):
             session = self.sql_session
         entity = cls.get_from_id(ident, session)
         if entity is None:
-            raise tornado_web.HTTPError(404)
+            raise tornado.web.HTTPError(404)
         return entity
 
     def prepare(self):
         """This method is executed at the beginning of each request.
 
         """
-        super().prepare()
+        super(BaseHandler, self).prepare()
         self.contest = None
 
     def render(self, template_name, **params):
@@ -320,7 +327,7 @@ class BaseHandler(CommonRequestHandler):
 
     def write_error(self, status_code, **kwargs):
         if "exc_info" in kwargs and \
-                kwargs["exc_info"][0] != tornado_web.HTTPError:
+                kwargs["exc_info"][0] != tornado.web.HTTPError:
             exc_info = kwargs["exc_info"]
             logger.error(
                 "Uncaught exception (%r) while processing a request: %s",
@@ -433,11 +440,10 @@ class BaseHandler(CommonRequestHandler):
             try:
                 value = int(value)
             except:
-                raise ValueError("Can't cast %s to int." % value)
+                raise ValueError("Can't cast %s to float." % value)
             if not 0 < value:
                 raise ValueError("Invalid memory limit.")
-            # AWS displays the value as MiB, but it is stored as bytes.
-            dest["memory_limit"] = value * 1024 * 1024
+            dest["memory_limit"] = value
 
     def get_task_type(self, dest, name, params):
         """Parse the task type.

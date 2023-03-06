@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2014-2016 Stefano Maggiolo <s.maggiolo@gmail.com>
@@ -38,14 +39,22 @@ together the three data point: item, priority, and timestamp.
 
 """
 
-from functools import total_ordering
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+from six import iteritems
 
 from gevent.event import Event
+
+from functools import total_ordering
 
 from cmscommon.datetime import make_datetime, make_timestamp
 
 
-class QueueItem:
+class QueueItem(object):
 
     """Payload of an item in the queue.
 
@@ -59,7 +68,7 @@ class QueueItem:
 
 
 @total_ordering
-class QueueEntry:
+class QueueEntry(object):
 
     """Type of the actual objects in the queue.
 
@@ -92,7 +101,7 @@ class QueueEntry:
                < (other.priority, other.timestamp, other.index)
 
 
-class PriorityQueue:
+class PriorityQueue(object):
 
     """A priority queue.
 
@@ -144,7 +153,7 @@ class PriorityQueue:
             return False
         if self._event.isSet() == self.empty():
             return False
-        for item, idx in self._reverse.items():
+        for item, idx in iteritems(self._reverse):
             if self._queue[idx].item != item:
                 return False
         return True

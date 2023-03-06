@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2013 Stefano Maggiolo <s.maggiolo@gmail.com>
@@ -25,18 +26,26 @@ contest done in the same commit.
 
 """
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+from six import iteritems
 
-class Updater:
+
+class Updater(object):
 
     def __init__(self, data):
         assert data["_version"] == 6
         self.objs = data
 
     def run(self):
-        for k, v in self.objs.items():
+        for k, v in iteritems(self.objs):
             if k.startswith("_"):
                 continue
             if v["_class"] == "Contest":
-                v["languages"] = ["c", "cpp", "pas"]
+                v["languages"] = [u"c", u"cpp", u"pas"]
 
         return self.objs

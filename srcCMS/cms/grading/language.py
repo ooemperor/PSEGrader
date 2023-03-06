@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2016-2017 Stefano Maggiolo <s.maggiolo@gmail.com>
@@ -18,6 +19,14 @@
 
 """Interfaces for supported programming languages."""
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+from six import with_metaclass
+
 import logging
 import os
 from abc import ABCMeta, abstractmethod
@@ -26,7 +35,7 @@ from abc import ABCMeta, abstractmethod
 logger = logging.getLogger(__name__)
 
 
-class Language(metaclass=ABCMeta):
+class Language(with_metaclass(ABCMeta, object)):
     """A supported programming language"""
 
     @property
@@ -36,7 +45,7 @@ class Language(metaclass=ABCMeta):
 
         Should be uniquely describing the language and the
         version/compiler used, for example "C++11 / g++" better than "C++",
-        or "Java 1.5 / JDK" better than "Java".
+        or "Java 1.5 / JDK", "Java 1.4 / gcj" better than "Java".
 
         return (str): the name
 
@@ -97,11 +106,6 @@ class Language(metaclass=ABCMeta):
         """Default object extension for the language."""
         return self.object_extensions[0] \
             if len(self.object_extensions) > 0 else None
-
-    @property
-    def executable_extension(self):
-        """Executable file extension for this language (including the dot)."""
-        return ""
 
     @abstractmethod
     def get_compilation_commands(self,

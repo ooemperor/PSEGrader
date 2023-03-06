@@ -1,9 +1,9 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2013-2018 Stefano Maggiolo <s.maggiolo@gmail.com>
 # Copyright © 2016 Luca Wehrstedt <luca.wehrstedt@gmail.com>
-# Copyright © 2022 William Di Luigi <williamdiluigi@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -18,18 +18,26 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+
 import argparse
-import datetime
+import io
 import logging
 import os
 import re
-import subprocess
 import sys
+import subprocess
+import datetime
 
 from cms import utf8_decoder
 from cmstestsuite import CONFIG, TestException, sh
 from cmstestsuite.coverage import clear_coverage, combine_coverage, \
-    coverage_cmdline
+    coverage_cmdline, send_coverage_to_codecov
 from cmstestsuite.profiling import \
     PROFILER_KERNPROF, PROFILER_NONE, PROFILER_YAPPI, profiling_cmdline
 
@@ -82,8 +90,8 @@ def run_unittests(test_list):
         results += " %s.%s\n" % (path, filename)
 
     if failures:
-        with open(FAILED_UNITTEST_FILENAME,
-                  "wt", encoding="utf-8") as failed_filename:
+        with io.open(FAILED_UNITTEST_FILENAME,
+                     "wt", encoding="utf-8") as failed_filename:
             for path, filename in failures:
                 failed_filename.write("%s %s\n" % (path, filename))
         results += "\n"
@@ -103,9 +111,9 @@ def load_test_list_from_file(filename):
     if not os.path.exists(filename):
         return []
     try:
-        with open(filename, "rt", encoding="utf-8") as f:
-            return [line.strip().split(" ") for line in f.readlines()]
-    except OSError as error:
+        lines = io.open(filename, "rt", encoding="utf-8").readlines()
+        return [line.strip().split(" ") for line in lines]
+    except (IOError, OSError) as error:
         print("Failed to read test list. %s." % error)
         return None
 
@@ -145,11 +153,13 @@ def main():
         "-r", "--retry-failed", action="store_true",
         help="only run failed tests from the previous run (stored in %s)" %
         FAILED_UNITTEST_FILENAME)
+    parser.add_argument(
+        "--codecov", action="store_true",
+        help="send coverage results to Codecov (requires --coverage)")
     g = parser.add_mutually_exclusive_group()
     g.add_argument(
-        "--coverage", action="store", type=utf8_decoder,
-        help="path to the XML coverage report file (if not specified, "
-             "coverage is not computed)")
+        "--coverage", action="store_true",
+        help="compute line coverage information")
     g.add_argument(
         "--profiler", choices=[PROFILER_YAPPI, PROFILER_KERNPROF],
         default=PROFILER_NONE, help="set profiler")
@@ -163,6 +173,8 @@ def main():
         help="unused")
 
     args = parser.parse_args()
+    if args.codecov and not args.coverage:
+        parser.error("--codecov requires --coverage")
 
     CONFIG["VERBOSITY"] = args.verbose
     CONFIG["COVERAGE"] = args.coverage
@@ -173,7 +185,7 @@ def main():
     try:
         git_root = subprocess.check_output(
             "git rev-parse --show-toplevel", shell=True,
-            stderr=subprocess.DEVNULL).decode('utf8').strip()
+            stderr=io.open(os.devnull, "wb")).decode('utf8').strip()
     except subprocess.CalledProcessError:
         print("Please run the unit tests from the git repository.")
         return 1
@@ -223,6 +235,9 @@ def main():
 
     end_time = datetime.datetime.now()
     print("Time elapsed: %s" % (end_time - start_time))
+
+    if args.codecov:
+        send_coverage_to_codecov("unittests")
 
     if passed:
         return 0

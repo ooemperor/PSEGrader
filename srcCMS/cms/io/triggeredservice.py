@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2014-2016 Stefano Maggiolo <s.maggiolo@gmail.com>
@@ -21,6 +22,14 @@ on notifications and sweeper loops.
 
 """
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+from six import with_metaclass
+
 import logging
 import time
 from abc import ABCMeta, abstractmethod
@@ -29,12 +38,13 @@ import gevent
 from gevent.event import Event
 
 from cms.io import PriorityQueue, Service, rpc_method
+from cmscommon.datetime import monotonic_time
 
 
 logger = logging.getLogger(__name__)
 
 
-class Executor(metaclass=ABCMeta):
+class Executor(with_metaclass(ABCMeta, object)):  # pylint: disable=R0921
 
     """A class taking care of executing operations.
 
@@ -55,7 +65,7 @@ class Executor(metaclass=ABCMeta):
             at a time.
 
         """
-        super().__init__()
+        super(Executor, self).__init__()
 
         self._batch_executions = batch_executions
         self._operation_queue = PriorityQueue()
@@ -99,22 +109,8 @@ class Executor(metaclass=ABCMeta):
 
         item (QueueItem): the item to remove.
 
-        return (QueueEntry): the corresponding queue entry.
-
         """
-        return self._operation_queue.remove(item)
-
-    def _pop(self, wait=False):
-        """Extract (and return) the first element in the queue.
-
-        wait (bool): if True, block until an element is present.
-
-        return (QueueEntry): first element in the queue.
-
-        raise (LookupError): on empty queue, if wait was false.
-
-        """
-        return self._operation_queue.pop(wait=wait)
+        self._operation_queue.remove(item)
 
     def run(self):
         """Monitor the queue, and dispatch operations when available.
@@ -128,13 +124,13 @@ class Executor(metaclass=ABCMeta):
         """
         while True:
             # Wait for the queue to be non-empty.
-            to_execute = [self._pop(wait=True)]
+            to_execute = [self._operation_queue.pop(wait=True)]
             if self._batch_executions:
                 max_operations = self.max_operations_per_batch()
                 while not self._operation_queue.empty() and (
                         max_operations == 0 or
                         len(to_execute) < max_operations):
-                    to_execute.append(self._pop())
+                    to_execute.append(self._operation_queue.pop())
 
             assert len(to_execute) > 0, "Expected at least one element."
             if self._batch_executions:
@@ -320,7 +316,7 @@ class TriggeredService(Service):
 
         """
         while True:
-            self._sweeper_start = time.monotonic()
+            self._sweeper_start = monotonic_time()
             self._sweeper_event.clear()
 
             try:
@@ -331,7 +327,7 @@ class TriggeredService(Service):
 
             self._sweeper_event.wait(max(self._sweeper_start +
                                          self._sweeper_timeout -
-                                         time.monotonic(), 0))
+                                         monotonic_time(), 0))
 
     def _sweep(self):
         """Check for missed operations."""

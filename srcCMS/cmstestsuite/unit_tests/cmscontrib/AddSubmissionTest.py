@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2018 Stefano Maggiolo <s.maggiolo@gmail.com>
@@ -18,19 +19,28 @@
 
 """Tests for the AddSubmission script"""
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+
 import unittest
 
 # Needs to be first to allow for monkey patching the DB connection string.
 from cmstestsuite.unit_tests.databasemixin import DatabaseMixin
-
-from cms.db import File, Submission
-from cmscommon.datetime import make_datetime
-from cmscommon.digest import bytes_digest
-from cmscontrib.AddSubmission import add_submission
 from cmstestsuite.unit_tests.filesystemmixin import FileSystemMixin
 
+from cms.db import File, Submission
 
-_TS = 1_234_567_890
+from cmscommon.datetime import make_datetime
+from cmscommon.digest import bytes_digest
+
+from cmscontrib.AddSubmission import add_submission
+
+
+_TS = 1234567890
 
 
 _CONTENT_1 = b"this is a source file"
@@ -49,7 +59,7 @@ class TestAddSubmissionMixin(DatabaseMixin, FileSystemMixin):
     """Mixin for testing AddSubmission with different tasks."""
 
     def setUp(self):
-        super().setUp()
+        super(TestAddSubmissionMixin, self).setUp()
 
         self.write_file(_FILENAME_1, _CONTENT_1)
         self.write_file(_FILENAME_2, _CONTENT_2)
@@ -67,7 +77,7 @@ class TestAddSubmissionMixin(DatabaseMixin, FileSystemMixin):
 
     def tearDown(self):
         self.delete_data()
-        super().tearDown()
+        super(TestAddSubmissionMixin, self).tearDown()
 
     def assertSubmissionInDb(self, timestamp, task, language, files):
         """Assert that the submission with the given data is in the DB."""
@@ -97,7 +107,7 @@ class TestAddSubmissionSingleSourceWithLanguage(
     """Tests for AddSubmission when the task has a single source file."""
 
     def setUp(self):
-        super().setUp()
+        super(TestAddSubmissionSingleSourceWithLanguage, self).setUp()
 
         self.task = self.add_task(submission_format=["source.%l"],
                                   contest=self.contest)
@@ -174,7 +184,7 @@ class TestAddSubmissionTwoSourcesWithLanguage(
     """Tests for AddSubmission when the task has two source files."""
 
     def setUp(self):
-        super().setUp()
+        super(TestAddSubmissionTwoSourcesWithLanguage, self).setUp()
 
         self.task = self.add_task(
             submission_format=["source1.%l", "source2.%l"],
@@ -225,7 +235,7 @@ class TestAddSubmissionTwoSourcesOneLanguage(
     """Tests for AddSubmission with one source with language and one not."""
 
     def setUp(self):
-        super().setUp()
+        super(TestAddSubmissionTwoSourcesOneLanguage, self).setUp()
 
         self.task = self.add_task(
             submission_format=["source1.%l", "source2"],
@@ -267,7 +277,7 @@ class TestAddSubmissionOutputOnly(
     """Tests for AddSubmission when there the submission has no language."""
 
     def setUp(self):
-        super().setUp()
+        super(TestAddSubmissionOutputOnly, self).setUp()
 
         self.task = self.add_task(submission_format=["source"],
                                   contest=self.contest)

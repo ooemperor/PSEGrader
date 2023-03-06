@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2018 Stefano Maggiolo <s.maggiolo@gmail.com>
@@ -17,6 +18,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """Tests for stats.py."""
+
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+from six import assertRegex
 
 import unittest
 
@@ -49,7 +58,7 @@ def get_stats(execution_time, execution_wall_clock_time, execution_memory,
 class TestExecutionStats(unittest.TestCase):
 
     def setUp(self):
-        super().setUp()
+        super(TestExecutionStats, self).setUp()
         self.sandbox = FakeIsolateSandbox(None)
         self.sandbox.stdout_file = "stdout.txt"
         self.sandbox.stderr_file = "stderr.txt"
@@ -96,8 +105,8 @@ class TestExecutionStats(unittest.TestCase):
         stats = execution_stats(self.sandbox, collect_output=True)
 
         # UTF-8 invalid parts are replaced with funny question marks (\uFFFD).
-        self.assertRegex(stats["stdout"], "^o.*1$")
-        self.assertRegex(stats["stderr"], "^e.*2$")
+        assertRegex(self, stats["stdout"], "^o.*1$")
+        assertRegex(self, stats["stderr"], "^e.*2$")
 
 
 class TestMergeExecutionStats(unittest.TestCase):

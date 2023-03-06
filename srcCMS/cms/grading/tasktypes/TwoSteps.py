@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2010-2012 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
@@ -20,17 +21,25 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+from six import iterkeys, iteritems
+
 import logging
 import os
 import tempfile
 
 from cms import config
-from cms.db import Executable
-from cms.grading.ParameterTypes import ParameterTypeChoice
 from cms.grading.Sandbox import wait_without_std
-from cms.grading.languagemanager import LANGUAGES, get_language
+from cms.grading.ParameterTypes import ParameterTypeChoice
 from cms.grading.steps import compilation_step, evaluation_step_before_run, \
     evaluation_step_after_run, human_evaluation_message, merge_execution_stats
+from cms.grading.languagemanager import LANGUAGES, get_language
+from cms.db import Executable
 from . import TaskType, \
     check_executables_number, check_files_number, check_manager_present, \
     create_sandbox, delete_sandbox, eval_output
@@ -92,7 +101,7 @@ class TwoSteps(TaskType):
         return "Two steps"
 
     def __init__(self, parameters):
-        super().__init__(parameters)
+        super(TwoSteps, self).__init__(parameters)
         self.output_eval = self.parameters[0]
 
     def get_compilation_commands(self, submission_format):
@@ -119,7 +128,7 @@ class TwoSteps(TaskType):
                     source_filenames.append(header_filename)
 
             # Get compilation command and compile.
-            executable_filename = "manager" + language.executable_extension
+            executable_filename = "manager"
             commands = language.get_compilation_commands(
                 source_filenames, executable_filename)
             res[language.name] = commands
@@ -165,7 +174,7 @@ class TwoSteps(TaskType):
                 job.managers[manager_filename].digest
 
         # User's submissions and headers.
-        for filename, file_ in job.files.items():
+        for filename, file_ in iteritems(job.files):
             source_filename = filename.replace(".%l", source_ext)
             source_filenames.append(source_filename)
             files_to_get[source_filename] = file_.digest
@@ -179,7 +188,7 @@ class TwoSteps(TaskType):
                     job.managers[header_filename].digest
 
         # Get compilation command.
-        executable_filename = "manager" + language.executable_extension
+        executable_filename = "manager"
         commands = language.get_compilation_commands(
             source_filenames, executable_filename)
 
@@ -187,7 +196,7 @@ class TwoSteps(TaskType):
         sandbox = create_sandbox(file_cacher, name="compile")
         job.sandboxes.append(sandbox.get_root_path())
 
-        for filename, digest in files_to_get.items():
+        for filename, digest in iteritems(files_to_get):
             sandbox.create_file_from_storage(filename, digest)
 
         # Run the compilation.
@@ -215,7 +224,7 @@ class TwoSteps(TaskType):
         if not check_executables_number(job, 1):
             return
 
-        executable_filename = next(iter(job.executables.keys()))
+        executable_filename = next(iterkeys(job.executables))
         executable_digest = job.executables[executable_filename].digest
 
         first_sandbox = create_sandbox(file_cacher, name="first_evaluate")
@@ -237,11 +246,11 @@ class TwoSteps(TaskType):
             }
 
         # Put the required files into the sandbox
-        for filename, digest in first_executables_to_get.items():
+        for filename, digest in iteritems(first_executables_to_get):
             first_sandbox.create_file_from_storage(filename,
                                                    digest,
                                                    executable=True)
-        for filename, digest in first_files_to_get.items():
+        for filename, digest in iteritems(first_files_to_get):
             first_sandbox.create_file_from_storage(filename, digest)
 
         first = evaluation_step_before_run(
@@ -260,11 +269,11 @@ class TwoSteps(TaskType):
         second_files_to_get = {}
 
         # Put the required files into the second sandbox
-        for filename, digest in second_executables_to_get.items():
+        for filename, digest in iteritems(second_executables_to_get):
             second_sandbox.create_file_from_storage(filename,
                                                     digest,
                                                     executable=True)
-        for filename, digest in second_files_to_get.items():
+        for filename, digest in iteritems(second_files_to_get):
             second_sandbox.create_file_from_storage(filename, digest)
 
         second = evaluation_step_before_run(

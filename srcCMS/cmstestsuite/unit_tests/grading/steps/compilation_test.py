@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2018 Stefano Maggiolo <s.maggiolo@gmail.com>
@@ -18,8 +19,16 @@
 
 """Tests for the compilation step."""
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+
 import unittest
-from unittest.mock import patch
+
+from mock import patch
 
 from cms.grading.Sandbox import Sandbox
 from cms.grading.steps import COMPILATION_MESSAGES, compilation_step
@@ -35,7 +44,7 @@ TWO_COMMANDS = [["test", "command", "1"], ["command", "2"]]
 class TestCompilationStep(unittest.TestCase):
 
     def setUp(self):
-        super().setUp()
+        super(TestCompilationStep, self).setUp()
         self.sandbox = FakeIsolateSandbox(None)
 
         patcher = patch("cms.grading.steps.compilation.logger.error")

@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2018 Stefano Maggiolo <s.maggiolo@gmail.com>
@@ -17,6 +18,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """Package containing high-level utilities for performing grading steps."""
+
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
 
 from .compilation import COMPILATION_MESSAGES, compilation_step
 from .evaluation import EVALUATION_MESSAGES, evaluation_step, \

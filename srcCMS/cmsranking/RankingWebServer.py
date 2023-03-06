@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2011-2017 Luca Wehrstedt <luca.wehrstedt@gmail.com>
@@ -16,8 +17,17 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from future.builtins.disabled import *  # noqa
+from future.builtins import *  # noqa
+from six import iterkeys, itervalues, iteritems
+
 import argparse
 import functools
+import io
 import json
 import logging
 import os
@@ -29,26 +39,29 @@ from datetime import datetime
 
 import gevent
 from gevent.pywsgi import WSGIServer
+
+from werkzeug.wrappers import Request, Response
+from werkzeug.routing import Map, Rule
 from werkzeug.exceptions import HTTPException, BadRequest, Unauthorized, \
     Forbidden, NotFound, NotAcceptable, UnsupportedMediaType
-from werkzeug.routing import Map, Rule
-from werkzeug.wrappers import Request, Response
 from werkzeug.wsgi import responder, wrap_file, SharedDataMiddleware, \
     DispatcherMiddleware
+from werkzeug.utils import redirect
 
 # Needed for initialization. Do not remove.
-import cmsranking.Logger  # noqa
+import cmsranking.Logger
+
 from cmscommon.eventsource import EventSource
 from cmsranking.Config import Config
-from cmsranking.Contest import Contest
 from cmsranking.Entity import InvalidData
-from cmsranking.Scoring import ScoringStore
-from cmsranking.Store import Store
-from cmsranking.Subchange import Subchange
-from cmsranking.Submission import Submission
+from cmsranking.Contest import Contest
 from cmsranking.Task import Task
 from cmsranking.Team import Team
 from cmsranking.User import User
+from cmsranking.Submission import Submission
+from cmsranking.Subchange import Subchange
+from cmsranking.Scoring import ScoringStore
+from cmsranking.Store import Store
 
 
 logger = logging.getLogger(__name__)
@@ -57,11 +70,10 @@ logger = logging.getLogger(__name__)
 class CustomUnauthorized(Unauthorized):
 
     def __init__(self, realm_name):
-        super().__init__()
         self.realm_name = realm_name
 
     def get_response(self, environ=None):
-        response = super().get_response(environ)
+        response = Unauthorized.get_response(self, environ)
         # XXX With werkzeug-0.9 a full-featured Response object is
         # returned: there is no need for this.
         response = Response.force_type(response)
@@ -69,7 +81,7 @@ class CustomUnauthorized(Unauthorized):
         return response
 
 
-class StoreHandler:
+class StoreHandler(object):
 
     def __init__(self, store, username, password, realm_name):
         self.store = store
@@ -173,8 +185,8 @@ class StoreHandler:
                 self.store.create(key, data)
             else:
                 self.store.update(key, data)
-        except InvalidData as err:
-            logger.warning("Invalid data: %s" % str(err), exc_info=False,
+        except InvalidData:
+            logger.warning("Invalid data.", exc_info=True,
                            extra={'location': request.url,
                                   'details': pprint.pformat(data)})
             raise BadRequest()
@@ -202,8 +214,8 @@ class StoreHandler:
 
         try:
             self.store.merge_list(data)
-        except InvalidData as err:
-            logger.warning("Invalid data: %s" % str(err), exc_info=False,
+        except InvalidData:
+            logger.warning("Invalid data.", exc_info=True,
                            extra={'location': request.url,
                                   'details': pprint.pformat(data)})
             raise BadRequest()
@@ -283,7 +295,7 @@ class DataWatcher(EventSource):
         self.send("score", "%s %s %0.2f" % (user, task, score))
 
 
-class SubListHandler:
+class SubListHandler(object):
 
     def __init__(self, stores):
         self.task_store = stores["task"]
@@ -312,12 +324,9 @@ class SubListHandler:
             raise NotAcceptable()
 
         result = list()
-        for task_id in self.task_store._store.keys():
-            result.extend(
-                self.scoring_store.get_submissions(
-                    args["user_id"], task_id
-                ).values()
-            )
+        for task_id in iterkeys(self.task_store._store):
+            result.extend(itervalues(
+                self.scoring_store.get_submissions(args["user_id"], task_id)))
         result.sort(key=lambda x: (x.task, x.time))
         result = list(a.__dict__ for a in result)
 
@@ -329,7 +338,7 @@ class SubListHandler:
         return response(environ, start_response)
 
 
-class HistoryHandler:
+class HistoryHandler(object):
 
     def __init__(self, stores):
         self.scoring_store = stores["scoring"]
@@ -354,7 +363,7 @@ class HistoryHandler:
         return response(environ, start_response)
 
 
-class ScoreHandler:
+class ScoreHandler(object):
 
     def __init__(self, stores):
         self.scoring_store = stores["scoring"]
@@ -370,8 +379,8 @@ class ScoreHandler:
             raise NotAcceptable()
 
         result = dict()
-        for u_id, tasks in self.scoring_store._scores.items():
-            for t_id, score in tasks.items():
+        for u_id, tasks in iteritems(self.scoring_store._scores):
+            for t_id, score in iteritems(tasks):
                 if score.get_score() > 0.0:
                     result.setdefault(u_id, dict())[t_id] = score.get_score()
 
@@ -384,7 +393,7 @@ class ScoreHandler:
         return response(environ, start_response)
 
 
-class ImageHandler:
+class ImageHandler(object):
     EXT_TO_MIME = {
         'png': 'image/png',
         'jpg': 'image/jpeg',
@@ -392,7 +401,7 @@ class ImageHandler:
         'bmp': 'image/bmp'
     }
 
-    MIME_TO_EXT = dict((v, k) for k, v in EXT_TO_MIME.items())
+    MIME_TO_EXT = dict((v, k) for k, v in iteritems(EXT_TO_MIME))
 
     def __init__(self, location, fallback):
         self.location = location
@@ -421,7 +430,7 @@ class ImageHandler:
         response = Response()
 
         available = list()
-        for extension, mimetype in self.EXT_TO_MIME.items():
+        for extension, mimetype in iteritems(self.EXT_TO_MIME):
             if os.path.isfile(location + '.' + extension):
                 available.append(mimetype)
         mimetype = request.accept_mimetypes.best_match(available)
@@ -439,42 +448,16 @@ class ImageHandler:
 
         # TODO check for If-Modified-Since and If-None-Match
 
-        response.response = wrap_file(environ, open(path, 'rb'))
+        response.response = wrap_file(environ, io.open(path, 'rb'))
         response.direct_passthrough = True
 
         return response
 
 
-class RootHandler:
+class RoutingHandler(object):
 
-    def __init__(self, location):
-        self.path = os.path.join(location, "Ranking.html")
-
-    def __call__(self, environ, start_response):
-        return self.wsgi_app(environ, start_response)
-
-    @responder
-    def wsgi_app(self, environ, start_response):
-        request = Request(environ)
-        request.encoding_errors = "strict"
-
-        response = Response()
-        response.status_code = 200
-        response.mimetype = "text/html"
-        response.last_modified = \
-            datetime.utcfromtimestamp(os.path.getmtime(self.path))\
-                    .replace(microsecond=0)
-        # TODO check for If-Modified-Since and If-None-Match
-        response.response = wrap_file(environ, open(self.path, 'rb'))
-        response.direct_passthrough = True
-
-        return response
-
-
-class RoutingHandler:
-
-    def __init__(self, root_handler, event_handler, logo_handler,
-                 score_handler, history_handler):
+    def __init__(
+            self, event_handler, logo_handler, score_handler, history_handler):
         self.router = Map([
             Rule("/", methods=["GET"], endpoint="root"),
             Rule("/history", methods=["GET"], endpoint="history"),
@@ -487,7 +470,7 @@ class RoutingHandler:
         self.logo_handler = logo_handler
         self.score_handler = score_handler
         self.history_handler = history_handler
-        self.root_handler = root_handler
+        self.root_handler = redirect("Ranking.html")
 
     def __call__(self, environ, start_response):
         return self.wsgi_app(environ, start_response)
@@ -523,19 +506,14 @@ def main():
                         help="override config file")
     parser.add_argument("-d", "--drop", action="store_true",
                         help="drop the data already stored")
-    parser.add_argument("-y", "--yes", action="store_true",
-                        help="do not require confirmation on dropping data")
     args = parser.parse_args()
 
     config = Config()
     config.load(args.config)
 
     if args.drop:
-        if args.yes:
-            ans = 'y'
-        else:
-            ans = input("Are you sure you want to delete directory %s? [y/N] " %
-                        config.lib_dir).strip().lower()
+        ans = input("Are you sure you want to delete directory %s? [y/N]" %
+                    config.lib_dir).strip().lower()
         if ans in ['y', 'yes']:
             print("Removing directory %s." % config.lib_dir)
             shutil.rmtree(config.lib_dir)
@@ -574,7 +552,6 @@ def main():
     stores["scoring"].init_store()
 
     toplevel_handler = RoutingHandler(
-        RootHandler(config.web_dir),
         DataWatcher(stores, config.buffer_size),
         ImageHandler(
             os.path.join(config.lib_dir, '%(name)s'),

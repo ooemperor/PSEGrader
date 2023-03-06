@@ -1,0 +1,32 @@
+name: ci
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - name: Check available cgroups
+        run: |
+          mount | grep cgroup
+
+      - name: Run tests
+        run: |
+          docker-compose -f docker-compose.test.yml run cms_test
+
+      - uses: codecov/codecov-action@v3
+        with:
+          files: ./codecov/unittests.xml
+          flags: unittests
+
+      - uses: codecov/codecov-action@v3
+        with:
+          files: ./codecov/functionaltests.xml
+          flags: functionaltests

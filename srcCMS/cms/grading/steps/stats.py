@@ -108,7 +108,12 @@ def merge_execution_stats(first_stats, second_stats, concurrent=True):
     else:
         ret["execution_wall_clock_time"] += \
             second_stats["execution_wall_clock_time"]
-        ret["execution_memory"] = max(ret["execution_memory"],
+        if second_stats["execution_memory"] is None:
+            ret["execution_memory"] = ret["execution_memory"]
+        elif ret["execution_memory"] is None:
+            ret["execution_memory"] = second_stats["execution_memory"]
+        else:
+            ret["execution_memory"] = max(ret["execution_memory"],
                                       second_stats["execution_memory"])
 
     if first_stats["exit_status"] == Sandbox.EXIT_OK:

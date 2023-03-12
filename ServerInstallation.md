@@ -16,6 +16,10 @@ Install missing packages on the server:
 
 This includes the dist-upgrade
 
+Then install the following packages:
+
+<code>sudo apt-get install libcap-dev libcups2-dev libpq-dev python3-dev libcgroup-dev openjdk-17-jdk openjdk-17-jre zip -y</code>
+
 ## Getting the repository
 Cloning via HTTPs so no ssh key is needed:
 

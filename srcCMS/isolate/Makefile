@@ -1,5 +1,5 @@
 # Makefile for Isolate
-# (c) 2015--2018 Martin Mares <mj@ucw.cz>
+# (c) 2015--2023 Martin Mares <mj@ucw.cz>
 # (c) 2017 Bernard Blackham <bernard@blackham.com.au>
 
 all: isolate isolate.1 isolate.1.html isolate-check-environment
@@ -8,8 +8,8 @@ CC=gcc
 CFLAGS=-std=gnu99 -Wall -Wextra -Wno-parentheses -Wno-unused-result -Wno-missing-field-initializers -Wstrict-prototypes -Wmissing-prototypes -D_GNU_SOURCE
 LIBS=-lcap
 
-VERSION=1.6
-YEAR=2018
+VERSION=1.10
+YEAR=2023
 BUILD_DATE:=$(shell date '+%Y-%m-%d')
 BUILD_COMMIT:=$(shell if git rev-parse >/dev/null 2>/dev/null ; then git describe --always --tags ; else echo '<unknown>' ; fi)
 
@@ -27,7 +27,7 @@ BOXDIR = $(VARPREFIX)/lib/isolate
 isolate: isolate.o util.o rules.o cg.o config.o
 	$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
 
-%.o: %.c isolate.h config.h
+%.o: %.c isolate.h
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 isolate.o: CFLAGS += -DVERSION='"$(VERSION)"' -DYEAR='"$(YEAR)"' -DBUILD_DATE='"$(BUILD_DATE)"' -DBUILD_COMMIT='"$(BUILD_COMMIT)"'
@@ -60,7 +60,7 @@ release: isolate.1.html
 	git tag v$(VERSION)
 	git push --tags
 	git archive --format=tar --prefix=isolate-$(VERSION)/ HEAD | gzip >isolate-$(VERSION).tar.gz
-	rsync isolate-$(VERSION).tar.gz atrey:ftp/isolate/
+	rsync isolate-$(VERSION).tar.gz jw:/home/ftp/pub/mj/isolate/
 	rsync isolate.1.html jw:/var/www/moe/
 	ssh jw 'cd web && bin/release-prog isolate $(VERSION)'
 

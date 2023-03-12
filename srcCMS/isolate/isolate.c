@@ -1,7 +1,7 @@
 /*
  *	A Process Isolator based on Linux Containers
  *
- *	(c) 2012-2018 Martin Mares <mj@ucw.cz>
+ *	(c) 2012-2023 Martin Mares <mj@ucw.cz>
  *	(c) 2012-2014 Bernard Blackham <bernard@blackham.com.au>
  */
 
@@ -15,9 +15,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <net/if.h>
 #include <sys/mount.h>
 #include <sys/resource.h>
 #include <sys/signal.h>
+#include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/vfs.h>
@@ -72,6 +74,8 @@ static int silent;
 static int fsize_limit;
 static int memory_limit;
 static int stack_limit;
+static int open_file_limit = 64;
+static int core_limit;
 int block_quota;
 int inode_quota;
 static int max_processes = 1;
@@ -81,6 +85,8 @@ static char *set_cwd;
 static int share_net;
 static int inherit_fds;
 static int default_dirs = 1;
+static int tty_hack;
+static bool special_files;
 
 int cg_enable;
 int cg_memory_limit;
@@ -140,10 +146,28 @@ box_exit(int rc)
 	  kill(-box_pid, SIGKILL);
 	  kill(box_pid, SIGKILL);
 	}
-      kill(-proxy_pid, SIGKILL);
-      kill(proxy_pid, SIGKILL);
+      if (cg_enable)
+	{
+	  /*
+	   *  In non-CG mode, we must not kill the proxy explicitly.
+	   *  This is important, because the proxy could exit before the box
+	   *  completes its exit, causing rusage of the box to be lost.
+	   *
+	   *  In CG mode, we must kill the proxy, because it is the init
+	   *  process of the CG and killing it causes all other processes
+	   *  inside the CG to be killed. However, we do not care about
+	   *  rusage (unless somebody asks for --no-cg-timing, which is not
+	   *  reliable anyway).
+	   */
+	  kill(-proxy_pid, SIGKILL);
+	  kill(proxy_pid, SIGKILL);
+	}
       meta_printf("killed:1\n");
 
+      /*
+       *  The rusage will contain time spent by the proxy and its children (i.e., the box).
+       *  (See comments on killing of the proxy above, though.)
+       */
       struct rusage rus;
       int p, stat;
       do
@@ -155,8 +179,18 @@ box_exit(int rc)
 	final_stats(&rus);
     }
 
+  if (tty_hack && isatty(1))
+    {
+      /*
+       *  If stdout is a tty, make us the foreground process group again.
+       *  We do not need it (we ignore SIGTTOU anyway), but programs executed
+       *  after our exit will.
+       */
+      tcsetpgrp(1, getpgrp());
+    }
+
   if (rc < 2 && cleanup_ownership)
-    chowntree("box", orig_uid, orig_gid);
+    chowntree("box", orig_uid, orig_gid, special_files);
 
   meta_close();
   exit(rc);
@@ -274,6 +308,7 @@ static const struct signal_rule signal_rules[] = {
   { SIGUSR1,	SIGNAL_IGNORE },
   { SIGUSR2,	SIGNAL_IGNORE },
   { SIGBUS,	SIGNAL_FATAL },
+  { SIGTTOU,	SIGNAL_IGNORE },
 };
 
 static void
@@ -496,6 +531,7 @@ box_keeper(void)
       if (n != sizeof(stat))
 	die("Did not receive exit status from proxy");
 
+      // At this point, the rusage includes time spent by the proxy's children.
       final_stats(&rus);
       if (timeout && total_ms > timeout)
 	err("TO: Time limit exceeded");
@@ -560,6 +596,27 @@ setup_root(void)
 }
 
 static void
+setup_net(void)
+{
+  if (share_net)
+    return;
+
+  int fd = socket(PF_INET, SOCK_DGRAM, 0);
+  if (fd < 0)
+    die("Cannot create PF_INET socket: %m");
+
+  struct ifreq ifr = { .ifr_name = "lo" };
+  if (ioctl(fd, SIOCGIFFLAGS, &ifr) < 0)
+    die("SIOCGIFFLAGS on 'lo' failed: %m");
+
+  ifr.ifr_flags |= IFF_UP;
+  if (ioctl(fd, SIOCSIFFLAGS, &ifr) < 0)
+    die("SIOCSIFFLAGS on 'lo' failed: %m");
+
+  close(fd);
+}
+
+static void
 setup_credentials(void)
 {
   if (setresgid(box_gid, box_gid, box_gid) < 0)
@@ -569,6 +626,13 @@ setup_credentials(void)
   if (setresuid(box_uid, box_uid, box_uid) < 0)
     die("setresuid: %m");
   setpgrp();
+  if (tty_hack && isatty(1))
+    {
+      // If stdout is a tty, make us the foreground process group
+      signal(SIGTTOU, SIG_IGN);
+      tcsetpgrp(1, getpgrp());
+      signal(SIGTTOU, SIG_DFL);
+    }
 }
 
 static void
@@ -618,9 +682,12 @@ setup_rlimits(void)
   if (fsize_limit)
     RLIM(FSIZE, (rlim_t)fsize_limit * 1024);
 
+  if (open_file_limit)
+    RLIM(NOFILE, (rlim_t)open_file_limit);
+
   RLIM(STACK, (stack_limit ? (rlim_t)stack_limit * 1024 : RLIM_INFINITY));
-  RLIM(NOFILE, 64);
   RLIM(MEMLOCK, 0);
+  RLIM(CORE, (rlim_t)core_limit * 1024);
 
   if (max_processes)
     RLIM(NPROC, max_processes);
@@ -633,6 +700,7 @@ box_inside(char **args)
 {
   cg_enter();
   setup_root();
+  setup_net();
   setup_rlimits();
   setup_credentials();
   setup_fds();
@@ -642,7 +710,8 @@ box_inside(char **args)
     die("chdir: %m");
 
   execve(args[0], args, env);
-  die("execve(\"%s\"): %m", args[0]);
+  fprintf(stderr, "execve(\"%s\"): %m\n", args[0]);
+  exit(127);
 }
 
 /*** Proxy ***/
@@ -805,7 +874,7 @@ run(char **argv)
   if (!inherit_fds)
     close_all_fds();
 
-  chowntree("box", box_uid, box_gid);
+  chowntree("box", box_uid, box_gid, false);
   cleanup_ownership = 1;
 
   setup_pipe(error_pipes, 1);
@@ -814,7 +883,7 @@ run(char **argv)
 
   proxy_pid = clone(
     box_proxy,			// Function to execute as the body of the new process
-    argv,			// Pass our stack
+    (void*)((uintptr_t)argv & ~(uintptr_t)15),	// Pass our stack, aligned to 16-bytes
     SIGCHLD | CLONE_NEWIPC | (share_net ? 0 : CLONE_NEWNET) | CLONE_NEWNS | CLONE_NEWPID,
     argv);			// Pass the arguments
   if (proxy_pid < 0)
@@ -862,15 +931,17 @@ Options:\n\
     --cg-timing\t\tTime limits affects total run time of the control group\n\
 \t\t\t(this is turned on by default, use --no-cg-timing to turn off)\n\
 -c, --chdir=<dir>\tChange directory to <dir> before executing the program\n\
+    --core=<size>\tLimit core files to <size> KB (default: 0)\n\
 -d, --dir=<dir>\t\tMake a directory <dir> visible inside the sandbox\n\
     --dir=<in>=<out>\tMake a directory <out> outside visible as <in> inside\n\
     --dir=<in>=\t\tDelete a previously defined directory rule (even a default one)\n\
     --dir=...:<opt>\tSpecify options for a rule:\n\
-\t\t\t\tdev\tAllow access to special files\n\
+\t\t\t\tdev\tAllow access to block/char devices\n\
 \t\t\t\tfs\tMount a filesystem (e.g., --dir=/proc:proc:fs)\n\
 \t\t\t\tmaybe\tSkip the rule if <out> does not exist\n\
 \t\t\t\tnoexec\tDo not allow execution of binaries\n\
 \t\t\t\trw\tAllow read-write access\n\
+\t\t\t\ttmp\tCreate as a temporary directory (implies rw)\n\
 -D, --no-default-dirs\tDo not add default directory rules\n\
 -f, --fsize=<size>\tMax size (in KB) of files that can be created\n\
 -E, --env=<var>\t\tInherit the environment variable <var> from the parent process\n\
@@ -878,12 +949,14 @@ Options:\n\
 -x, --extra-time=<time>\tSet extra timeout, before which a timing-out program is not yet killed,\n\
 \t\t\tso that its real execution time is reported (seconds, fractions allowed)\n\
 -e, --full-env\t\tInherit full environment of the parent process\n\
-    --inherit-fds\t\tInherit all file descriptors of the parent process\n\
+    --inherit-fds\tInherit all file descriptors of the parent process\n\
 -m, --mem=<size>\tLimit address space to <size> KB\n\
 -M, --meta=<file>\tOutput process information to <file> (name:value)\n\
+-n, --open-files=<max>\tLimit number of open files to <max> (default: 64, 0=unlimited)\n\
 -q, --quota=<blk>,<ino>\tSet disk quota to <blk> blocks and <ino> inodes\n\
     --share-net\t\tShare network namespace with the parent process\n\
 -s, --silent\t\tDo not print status messages except for fatal errors\n\
+    --special-files\tKeep non-regular files (symlinks etc.) produced inside sandbox\n\
 -k, --stack=<size>\tLimit stack size to <size> KB (default: 0=unlimited)\n\
 -r, --stderr=<file>\tRedirect stderr to <file>\n\
     --stderr-to-stdout\tRedirect stderr to stdout\n\
@@ -891,6 +964,7 @@ Options:\n\
 -o, --stdout=<file>\tRedirect stdout to <file>\n\
 -p, --processes[=<max>]\tEnable multiple processes (at most <max> of them); needs --cg\n\
 -t, --time=<time>\tSet run time limit (seconds, fractions allowed)\n\
+    --tty-hack\t\tAllow interactive programs in the sandbox (see man for caveats)\n\
 -v, --verbose\t\tBe verbose (use multiple times for even more verbosity)\n\
 -w, --wall-time=<time>\tSet wall clock time limit (seconds, fractions allowed)\n\
 \n\
@@ -915,6 +989,9 @@ enum opt_code {
   OPT_SHARE_NET,
   OPT_INHERIT_FDS,
   OPT_STDERR_TO_STDOUT,
+  OPT_TTY_HACK,
+  OPT_CORE,
+  OPT_SPECIAL_FILES,
 };
 
 static const char short_opts[] = "b:c:d:DeE:f:i:k:m:M:o:p::q:r:st:vw:x:";
@@ -926,6 +1003,7 @@ static const struct option long_opts[] = {
   { "cg-mem",		1, NULL, OPT_CG_MEM },
   { "cg-timing",	0, NULL, OPT_CG_TIMING },
   { "cleanup",		0, NULL, OPT_CLEANUP },
+  { "core",		1, NULL, OPT_CORE },
   { "dir",		1, NULL, 'd' },
   { "no-cg-timing",	0, NULL, OPT_NO_CG_TIMING },
   { "no-default-dirs",  0, NULL, 'D' },
@@ -943,11 +1021,14 @@ static const struct option long_opts[] = {
   { "share-net",	0, NULL, OPT_SHARE_NET },
   { "silent",		0, NULL, 's' },
   { "stack",		1, NULL, 'k' },
+  { "open-files",	1, NULL, 'n' },
+  { "special-files",	0, NULL, OPT_SPECIAL_FILES },
   { "stderr",		1, NULL, 'r' },
   { "stderr-to-stdout",	0, NULL, OPT_STDERR_TO_STDOUT },
   { "stdin",		1, NULL, 'i' },
   { "stdout",		1, NULL, 'o' },
   { "time",		1, NULL, 't' },
+  { "tty-hack",		0, NULL, OPT_TTY_HACK },
   { "verbose",		0, NULL, 'v' },
   { "version",		0, NULL, OPT_VERSION },
   { "wall-time",	1, NULL, 'w' },
@@ -991,7 +1072,7 @@ main(int argc, char **argv)
 	break;
       case 'd':
 	if (!set_dir_action(optarg))
-	  usage("Invalid directory specified: %s\n", optarg);
+	  usage("Invalid directory rule specified: %s\n", optarg);
 	break;
       case 'D':
         default_dirs = 0;
@@ -1008,6 +1089,9 @@ main(int argc, char **argv)
         break;
       case 'k':
 	stack_limit = opt_uint(optarg);
+	break;
+      case 'n':
+	open_file_limit = opt_uint(optarg);
 	break;
       case 'i':
 	redir_stdin = optarg;
@@ -1028,9 +1112,11 @@ main(int argc, char **argv)
 	  max_processes = 0;
 	break;
       case 'q':
+	optarg = xstrdup(optarg);
 	sep = strchr(optarg, ',');
 	if (!sep)
 	  usage("Invalid quota specified: %s\n", optarg);
+	*sep = 0;
 	block_quota = opt_uint(optarg);
 	inode_quota = opt_uint(sep+1);
 	break;
@@ -1083,6 +1169,15 @@ main(int argc, char **argv)
       case OPT_STDERR_TO_STDOUT:
 	redir_stderr = NULL;
 	redir_stderr_to_stdout = 1;
+	break;
+      case OPT_TTY_HACK:
+	tty_hack = 1;
+	break;
+      case OPT_CORE:
+	core_limit = opt_uint(optarg);
+	break;
+      case OPT_SPECIAL_FILES:
+	special_files = true;
 	break;
       default:
 	usage(NULL);

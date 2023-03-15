@@ -102,6 +102,12 @@ class User(Base):
         ARRAY(String),
         nullable=False,
         default=[])
+    
+    user_tag = Column(
+        ARRAY(String),
+        nullable=True,
+        default=[]
+    )
 
     # These one-to-many relationships are the reversed directions of
     # the ones defined in the "child" classes using foreign keys.

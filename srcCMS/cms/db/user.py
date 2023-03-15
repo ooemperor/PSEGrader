@@ -102,11 +102,10 @@ class User(Base):
         ARRAY(String),
         nullable=False,
         default=[])
-    
+
     user_tag = Column(
-        ARRAY(String),
-        nullable=True,
-        default=[]
+        Unicode,
+        nullable=True
     )
 
     # These one-to-many relationships are the reversed directions of

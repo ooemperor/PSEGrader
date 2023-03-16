@@ -46,15 +46,6 @@
         <td>{{ u.user_tag }}</td>
       </tr>
       {% endfor %}
-      <tr>
-        <td>
-          <input type="radio" name="user_id" value="{{ u.id }}" />
-        </td>
-        <td><a href="test">test</a></td>
-        <td>abc</td>
-        <td>def</td>
-        <td>ghi</td>
-      </tr>
     </tbody>
   </table>
 </form>
@@ -75,7 +66,6 @@
     for (i = 0; i < tr.length; i++) {
       td_tag = tr[i].getElementsByTagName("td")[4];
       td_username = tr[i].getElementsByTagName("td")[1];
-      console.log(td);
       if (td_username && td_tag) {
         txtValue_username = td_username.textContent || td_username.innerText;
         txtValue_tag = td_tag.textContent || td_tag.innerText;

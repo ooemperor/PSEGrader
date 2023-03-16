@@ -250,6 +250,7 @@ class AddUserHandler(SimpleHandler("add_user.html", permission_all=True)):
             self.get_string(attrs, "timezone", empty=None)
 
             self.get_string_list(attrs, "preferred_languages")
+            self.get_string(attrs, "user_tag")
 
             # Create the user.
             user = User(**attrs)

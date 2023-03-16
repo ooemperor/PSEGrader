@@ -106,7 +106,6 @@ class UserListHandler(SimpleHandler("users.html")):
     """
 
     REMOVE = "Remove"
-    FILTER = "Filter"
 
     @require_permission(BaseHandler.AUTHENTICATED)
     def post(self):
@@ -117,8 +116,6 @@ class UserListHandler(SimpleHandler("users.html")):
             asking_page = self.url("users", user_id, "remove")
             # Open asking for remove page
             self.redirect(asking_page)
-        elif operation == self.FILTER:
-            self.render("users.html", **self.r_params)
         else:
             self.service.add_notification(
                 make_datetime(), "Invalid operation %s" % operation, "")

@@ -5,17 +5,25 @@
 <div class="core_title">
   <h1>Users list</h1>
 </div>
+<h2 id="title_filter" class="toggling_on">Search Filters</h2>
+<div id="filter_users">
+  <table>
+    <tr>
+      <td>Username</td>
+      <td><input type="text" name="filter_username" /></td>
+    </tr>
+    <tr>
+      <td>Tag</td>
+      <td><input type="text" name="filter_tag" /></td>
+    </tr>
+  </table>
+  <input type="submit" name="operation" value="Filter" {% if not admin.permission_all %} disabled {% endif %} />
+</div>
 
-<form action="{{ url("users") }}" method="POST">
+<form action="{{ url(" users") }}" method="POST">
   {{ xsrf_form_html|safe }}
   Edit selected user:
-   <input type="submit"
-         name="operation"
-         value="Remove"
-{% if not admin.permission_all %}
-         disabled
-{% endif %}
-         />
+  <input type="submit" name="operation" value="Remove" {% if not admin.permission_all %} disabled {% endif %} />
   <table class="bordered">
     <thead>
       <tr>
@@ -30,9 +38,9 @@
       {% for u in user_list|sort(attribute="username") %}
       <tr>
         <td>
-          <input type="radio" name="user_id" value="{{ u.id }}"/>
+          <input type="radio" name="user_id" value="{{ u.id }}" />
         </td>
-        <td><a href="{{ url("user", u.id) }}">{{ u.username }}</a></td>
+        <td><a href="{{ url(" user", u.id) }}">{{ u.username }}</a></td>
         <td>{{ u.first_name }}</td>
         <td>{{ u.last_name }}</td>
         <td>{{ u.user_tag }}</td>

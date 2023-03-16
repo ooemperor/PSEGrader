@@ -7,25 +7,25 @@
 </div>
 <h2 id="title_filter" class="toggling_on">Search Filters</h2>
 <div id="filter_users">
-  <table>
+  <table id="filter_table">
     <tr>
       <td>Username</td>
-      <td><input type="text" name="filter_username" /></td>
+      <td><input type="text" name="filter_username" id="filter_username" onkeyup="filter_by_args()"/></td>
     </tr>
     <tr>
       <td>Tag</td>
-      <td><input type="text" name="filter_tag" /></td>
+      <td><input type="text" name="filter_tag" id="filter_tag" onkeyup="filter_by_args()"/></td>
     </tr>
   </table>
-  <input type="submit" name="operation" value="Filter" {% if not admin.permission_all %} disabled {% endif %} />
+  
 </div>
 
-<form action="{{ url(" users") }}" method="POST">
+<form action="{{ url(" users") }}" method="POST" id="user_form">
   {{ xsrf_form_html|safe }}
   Edit selected user:
   <input type="submit" name="operation" value="Remove" {% if not admin.permission_all %} disabled {% endif %} />
-  <table class="bordered">
-    <thead>
+  <table id="data_table" class="bordered">
+    <thead id = data_table_head>
       <tr>
         <th></th>
         <th>Username</th>
@@ -34,7 +34,7 @@
         <th>Tag</th>
       </tr>
     </thead>
-    <tbody>
+    <tbody id="data_table_body">
       {% for u in user_list|sort(attribute="username") %}
       <tr>
         <td>
@@ -46,8 +46,48 @@
         <td>{{ u.user_tag }}</td>
       </tr>
       {% endfor %}
+      <tr>
+        <td>
+          <input type="radio" name="user_id" value="{{ u.id }}" />
+        </td>
+        <td><a href="test">test</a></td>
+        <td>abc</td>
+        <td>def</td>
+        <td>ghi</td>
+      </tr>
     </tbody>
   </table>
 </form>
+
+<!--Script for the dynamic search of the users-->
+<script>
+  function filter_by_args(){
+    var input_username, input_tag, filter_username, filter_tagtable, tr, td, i, txtValue;
+
+    input_username = document.getElementById("filter_username");
+    input_tag = document.getElementById("filter_tag");
+    filter_username = input_username.value.toUpperCase();
+    filter_tag = input_tag.value.toUpperCase();
+    table_body = document.getElementById("data_table_body");
+    tr = table_body.getElementsByTagName("tr");
+
+
+    for (i = 0; i < tr.length; i++) {
+      td_tag = tr[i].getElementsByTagName("td")[4];
+      td_username = tr[i].getElementsByTagName("td")[1];
+      console.log(td);
+      if (td_username && td_tag) {
+        txtValue_username = td_username.textContent || td_username.innerText;
+        txtValue_tag = td_tag.textContent || td_tag.innerText;
+        if (txtValue_username.toUpperCase().indexOf(filter_username) > -1 
+        && txtValue_tag.toUpperCase().indexOf(filter_tag) > -1) {
+          tr[i].style.display = "";
+        } else {
+          tr[i].style.display = "none";
+        }
+      }
+    }
+  }
+</script>
 
 {% endblock core %}

@@ -9,11 +9,12 @@
 
 <h2 id="title_add_multiple_users" class="toggling_on">Search Filters</h2>
 <div id="add_multiple_users">
-    <form enctype="multipart/form-data" action="{{ url("userfileadd") }}" method="post">
+    <form enctype="multipart/form-data" action="{{ url("users", "userfileadd") }}" method="post">
+    {{ xsrf_form_html|safe }}
         File: <input type="file" name="upload_user_file" />
         <br />
         <br />
-        <input type="submit" value="upload" />
+        <input type="submit" value="Upload" />
         <div class="hr"></div>
 </div>
 

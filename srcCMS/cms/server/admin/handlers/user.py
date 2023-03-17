@@ -271,7 +271,7 @@ class AddUserHandler(SimpleHandler("add_user.html", permission_all=True)):
             self.redirect(fallback_page)
 
 
-class AddUserFileHandler(SimpleHandler("add_user_file_upload", permission_all=True)):
+class AddUserFileHandler(SimpleHandler("add_user_file_upload.html", permission_all=True)):
     @require_permission(BaseHandler.PERMISSION_ALL)
     def post(self):
         fallback_page = self.url("users")

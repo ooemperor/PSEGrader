@@ -37,6 +37,7 @@ from future.builtins import *  # noqa
 
 from cms.db import Contest, Participation, Submission, Team, User
 from cmscommon.datetime import make_datetime
+from cmscommon.crypto import hash_password, parse_authentication
 
 from .base import BaseHandler, SimpleHandler, require_permission
 
@@ -266,6 +267,68 @@ class AddUserHandler(SimpleHandler("add_user.html", permission_all=True)):
             # Create the user on RWS.
             self.service.proxy_service.reinitialize()
             self.redirect(self.url("user", user.id))
+        else:
+            self.redirect(fallback_page)
+
+
+class AddUserFileHandler(SimpleHandler("add_user_file_upload.html", permission_all=True)):
+    @require_permission(BaseHandler.PERMISSION_ALL)
+    def post(self):
+        fallback_page = self.url("users")
+
+        def addUserToDB(first_name, last_name, username, password, email, user_tag):
+            """
+            Adding a user to the database within the cms schema.
+            """
+            attrs = dict()
+
+            attrs.update({"first_name": first_name})
+            attrs.update({"last_name": last_name})
+            attrs.update({"username": username})
+            attrs.update({"password": hash_password(password, "bcrypt")})
+            attrs.update({"email": email})
+            attrs.update({"timezone": None})
+            attrs.update({"preferred_languages": []})
+            attrs.update({"user_tag": user_tag})
+
+            # Create the user.
+            user = User(**attrs)
+            self.sql_session.add(user)
+
+        def parseAddUser(line):
+            """
+            parsing and then adding the user to the database from the given line of string.
+            then writing it into the database.
+            """
+            lineSplitted = line.split(';')
+            _first_name = lineSplitted[0]
+            _last_name = lineSplitted[1]
+            _username = lineSplitted[2]
+            _password = lineSplitted[3]
+            _email = lineSplitted[6]
+            _user_tag = lineSplitted[7]
+
+            addUserToDB(_first_name, _last_name, _username, _password, _email, _user_tag)
+
+        try:
+            """
+            getting the file form the site and then giving it to the local method.
+            """
+            upl_file = self.request.files['upload_user_file'][0]
+            upl_file_body = upl_file['body'].decode("utf-8")
+            for userline in upl_file_body.splitlines():
+                parseAddUser(userline)
+
+        except Exception as error:
+            self.service.add_notification(
+                make_datetime(), "File is not valid!", repr(error))
+            self.redirect(fallback_page)
+            return
+
+        if self.try_commit():
+            # Create the user on RWS.
+            self.service.proxy_service.reinitialize()
+            self.redirect(self.url("users"))
         else:
             self.redirect(fallback_page)
 

@@ -90,6 +90,7 @@ from .dataset import \
     DownloadTestcasesHandler
 from .user import \
     AddUserHandler, \
+    AddUserFileHandler, \
     UserHandler, \
     UserListHandler, \
     RemoveUserHandler, \
@@ -201,6 +202,7 @@ HANDLERS = [
     (r"/users/([0-9]+)/remove", RemoveUserHandler),
     (r"/teams", SimpleHandler("teams.html")),
     (r"/users/add", AddUserHandler),
+    (r"/users/userfileadd", AddUserFileHandler),
     (r"/teams/add", AddTeamHandler),
     (r"/user/([0-9]+)", UserHandler),
     (r"/team/([0-9]+)", TeamHandler),

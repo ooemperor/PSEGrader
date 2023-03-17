@@ -285,10 +285,10 @@ class AddUserFileHandler(SimpleHandler("add_user_file_upload.html", permission_a
             attrs.update({"first_name": first_name})
             attrs.update({"last_name": last_name})
             attrs.update({"username": username})
-            attrs.update({"password": hash_password(password, "Hashed (bcrypt)")})
+            attrs.update({"password": hash_password(password, "bcrypt")})
             attrs.update({"email": email})
             attrs.update({"timezone": None})
-            attrs.update({"preferred_languages": None})
+            attrs.update({"preferred_languages": []})
             attrs.update({"user_tag": user_tag})
 
             # Create the user.

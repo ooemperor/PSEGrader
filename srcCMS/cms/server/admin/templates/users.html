@@ -21,7 +21,7 @@
   <div class="hr"></div>
 </div>
 
-<form action="{{ url(" users") }}" method="POST" id="user_form">
+<form action="{{ url("users") }}" method="POST" id="user_form">
   {{ xsrf_form_html|safe }}
   Edit selected user:
   <input type="submit" name="operation" value="Remove" {% if not admin.permission_all %} disabled {% endif %} />
@@ -70,7 +70,7 @@
       if (td_username && td_tag) {
         txtValue_username = td_username.textContent || td_username.innerText;
         txtValue_tag = td_tag.textContent || td_tag.innerText;
-        if (txtValue_username.toUpperCase().indexOf(filter_username) > -1 
+        if (txtValue_username.toUpperCase().indexOf(filter_username) > -1
         && txtValue_tag.toUpperCase().indexOf(filter_tag) > -1) {
           tr[i].style.display = "";
         } else {

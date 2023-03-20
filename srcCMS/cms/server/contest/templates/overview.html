@@ -199,7 +199,7 @@
     {% if actual_phase == 0 or actual_phase == 3%}
     <h2>{% trans %}Task overview{% endtrans %}</h2>
 
-    <input type="text" id="tag_input" onkeyup="CMS.CWSUtils.filter_tags()" placeholder="Search for contest tags...">
+    <input type="text" id="tag_input" onkeyup="filter_by_tag()" placeholder="Search for contest tags...">
 
     <table class="table table-bordered table-striped" id="task_overview">
         <!-- <colgroup>
@@ -225,7 +225,7 @@
                 {% endif %}
             </tr>
         </thead>
-        <tbody>
+        <tbody id="data_table_body">
             {% set extensions =
             "[%s]"|format(contest.languages|map("to_language")|map(attribute="source_extension")|unique|join("|")) %}
             {% for t_iter in contest.tasks %}
@@ -265,4 +265,27 @@
     {% endif %}
 
 </div>
+<script>
+  function filter_by_tag(){
+    var input, filter, table, tr, td, i, txtValue, table_body;
+    input = document.getElementById("tag_input");
+    filter = input.value.toUpperCase();
+    table = document.getElementById("task_overview");
+    table_body = document.getElementById("data_table_body");
+    tr = table_body.getElementsByTagName("tr");
+
+    // Loop through all table rows, and hide those who don't match the search query
+    for (i = 0; i < tr.length; i++) {
+      td = tr[i].getElementsByTagName("td")[6];
+      if (td) {
+        txtValue = td.textContent || td.innerText;
+        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+          tr[i].style.display = "";
+        } else {
+          tr[i].style.display = "none";
+        }
+      }
+    }
+  }
+</script>
 {% endblock core %}

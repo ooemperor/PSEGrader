@@ -406,6 +406,12 @@ class Dataset(Base):
         String,
         nullable=False)
 
+    # Tags of the Task
+    task_tags = Colum(
+        ARRAY(String),
+        nullable=True,
+        default=[])
+
     # Parameters for the task type class.
     task_type_parameters = Column(
         JSONB,

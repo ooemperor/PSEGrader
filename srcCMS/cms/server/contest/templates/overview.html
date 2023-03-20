@@ -180,7 +180,9 @@
 {% if actual_phase == 0 or actual_phase == 3%}
 <h2>{% trans %}Task overview{% endtrans %}</h2>
 
-<table class="table table-bordered table-striped">
+<input type="text" id="tag_input" onkeyup="CMS.CWSUtils.filter_tags()" placeholder="Search for contest tags...">
+
+<table class="table table-bordered table-striped" id="task_overview">
     <!-- <colgroup>
         <col class="task"/>
         <col class="time_limit"/>
@@ -197,6 +199,8 @@
             <th>{% trans %}Memory limit{% endtrans %}</th>
             <th>{% trans %}Type{% endtrans %}</th>
             <th>{% trans %}Files{% endtrans %}</th>
+            <th>{% trans %}Tags{% endtrans %}</th>
+
 {% if tokens_contest != TOKEN_MODE_DISABLED and tokens_tasks != TOKEN_MODE_DISABLED %}
             <th>{% trans %}Tokens{% endtrans %}</th>
 {% endif %}
@@ -232,6 +236,7 @@
             {% trans %}No{% endtrans %}
         {% endif %}
             </td>
+            <th> {{ t_iter.active_dataset.task_tags }}</th>
     {% endif %}
         </tr>
 {% endfor %}

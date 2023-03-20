@@ -59,7 +59,7 @@
 <!--Script for the dynamic search of the users-->
 <script>
   function filter_by_args(){
-    var input_title, input_tag, filter_title, filter_tagtable, tr, td, i, txtValue;
+    var input_title, input_tag, filter_title, filter_tag, table_body, tr, td, i, txtValue;
 
     input_title = document.getElementById("filter_title");
     input_tag = document.getElementById("filter_tag");
@@ -70,10 +70,10 @@
 
 
     for (i = 0; i < tr.length; i++) {
-      td_tag = tr[i].getElementsByTagName("td")[4];
+      td_tag = tr[i].getElementsByTagName("td")[3];
       td_title = tr[i].getElementsByTagName("td")[1];
-      if (td_username && td_tag) {
-        txtValue_title = td_username.textContent || td_username.innerText;
+      if (td_title && td_tag) {
+        txtValue_title = td_title.textContent || td_title.innerText;
         txtValue_tag = td_tag.textContent || td_tag.innerText;
         if (txtValue_title.toUpperCase().indexOf(filter_title) > -1
         && txtValue_tag.toUpperCase().indexOf(filter_tag) > -1) {

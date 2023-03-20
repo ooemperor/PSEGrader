@@ -41,7 +41,7 @@ showTaskTypeOption({{ dataset.id }});
 </div>
 
 <!-- We use "multipart/form-data" to have Tornado distinguish between missing and empty values. -->
-<form enctype="multipart/form-data" action="{{ url(" task", task.id) }}" method="POST" style="display:inline;">
+<form enctype="multipart/form-data" action="{{ url("task", task.id) }}" method="POST" style="display:inline;">
   {{ xsrf_form_html|safe }}
   <h2 id="title_task_configuration" class="toggling_on">Task configuration</h2>
   <div id="task_configuration">
@@ -72,7 +72,7 @@ showTaskTypeOption({{ dataset.id }});
           <span class="info" title="The Tags of the task as seen by the contestants."></span>
           Tags
         </td>
-        <td><input type="text" name="title" value="{{ task.task_tags }}" /></td>
+        <td><input type="text" name="task_tags" value="{{ task.task_tags }}" /></td>
       </tr>
       <tr>
         <td>
@@ -88,7 +88,7 @@ showTaskTypeOption({{ dataset.id }});
             title="The statements of this task, by language code. Primary statements are shown prominently to contestants."></span>
           Statements
           {% if admin.permission_all %}
-          [<a href="{{ url(" task", task.id, "statements" , "add" ) }}">add</a>]
+          [<a href="{{ url("task", task.id, "statements" , "add" ) }}">add</a>]
           {% endif %}
         </td>
         <td>
@@ -99,7 +99,7 @@ showTaskTypeOption({{ dataset.id }});
             <tbody>
               {% for statement in itervalues(task.statements) %}
               <tr>
-                <td><a href="{{ url(" file", statement.digest, "statement.pdf" ) }}">Statement for language "{{
+                <td><a href="{{ url("file", statement.digest, "statement.pdf" ) }}">Statement for language "{{
                     statement.language }}"</a></td>
                 <td>
                   <label>
@@ -108,7 +108,7 @@ showTaskTypeOption({{ dataset.id }});
                     Primary?
                   </label>
                 </td>
-                <td><a onclick="CMS.AWSUtils.ajax_delete('{{ url(" task", task.id, "statement" , statement.id) }}'); ">Delete</a></td>
+                <td><a onclick="CMS.AWSUtils.ajax_delete('{{ url("task", task.id, "statement" , statement.id) }}'); ">Delete</a></td>
               </tr>
             {% endfor %}
             </tbody>
@@ -122,7 +122,7 @@ showTaskTypeOption({{ dataset.id }});
                     title="Attachments for this task. Contestant can view and download attachments from the task page."></span>
                     Attachments
                     {% if admin.permission_all %}
-                    [<a href="{{ url(" task", task.id, "attachments" , "add" ) }}">add</a>]
+                    [<a href="{{ url("task", task.id, "attachments" , "add" ) }}">add</a>]
                     {% endif %}
                 </td>
                 <td>
@@ -132,7 +132,7 @@ showTaskTypeOption({{ dataset.id }});
                   {% for attachment in itervalues(task.attachments) %}
                   <div class="attachment">
                     <a href="{{ url(" file", attachment.digest, attachment.filename) }}">{{ attachment.filename }}</a>
-                    - <a onclick="CMS.AWSUtils.ajax_delete('{{ url(" task", task.id, "attachment" , attachment.id) }}'); ">Delete</a>
+                    - <a onclick="CMS.AWSUtils.ajax_delete('{{ url("task", task.id, "attachment" , attachment.id) }}'); ">Delete</a>
               </div>
             {% endfor %}
           {% endif %}

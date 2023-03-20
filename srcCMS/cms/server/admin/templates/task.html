@@ -29,7 +29,7 @@ showTaskTypeOption({{ dataset.id }});
   {% if submissions|length == 0 %}
   <p>No submissions for this task yet.</p>
   {% else %}
-  <a href="{{ url(" dataset", task.active_dataset_id) }}">
+  <a href="{{ url("dataset", task.active_dataset_id) }}">
     {% if submissions|length == 1 %}
     1 submission
     {% else %}
@@ -131,7 +131,7 @@ showTaskTypeOption({{ dataset.id }});
                   {% else %}
                   {% for attachment in itervalues(task.attachments) %}
                   <div class="attachment">
-                    <a href="{{ url(" file", attachment.digest, attachment.filename) }}">{{ attachment.filename }}</a>
+                    <a href="{{ url("file", attachment.digest, attachment.filename) }}">{{ attachment.filename }}</a>
                     - <a onclick="CMS.AWSUtils.ajax_delete('{{ url("task", task.id, "attachment" , attachment.id) }}'); ">Delete</a>
               </div>
             {% endfor %}
@@ -330,7 +330,7 @@ showTaskTypeOption({{ dataset.id }});
       No datasets have been created for this task.<br />
       {% endif %}
       {% if admin.permission_all %}
-      <a href="{{ url(" task", task.id, "add_dataset" ) }}">Create a new dataset</a><br />
+      <a href="{{ url("task", task.id, "add_dataset" ) }}">Create a new dataset</a><br />
       {% endif %}
     </p>
 
@@ -345,21 +345,21 @@ showTaskTypeOption({{ dataset.id }});
         {% if dataset is sameas (task.active_dataset) %}
         [Make Live ...]
         {% else %}
-        <a href="{{ url(" dataset", dataset.id, "activate" ) }}">[Make Live ...]</a>
+        <a href="{{ url("dataset", dataset.id, "activate" ) }}">[Make Live ...]</a>
         {% endif %}
-        <a href="{{ url(" dataset", dataset.id, "clone" ) }}">[Clone]</a>
-        <a href="{{ url(" dataset", dataset.id, "rename" ) }}">[Rename]</a>
+        <a href="{{ url("dataset", dataset.id, "clone" ) }}">[Clone]</a>
+        <a href="{{ url("dataset", dataset.id, "rename" ) }}">[Rename]</a>
         {% if dataset is sameas (task.active_dataset) %}
         [Delete]
         {% else %}
-        <a href="{{ url(" dataset", dataset.id, "delete" ) }}">[Delete]</a>
+        <a href="{{ url("dataset", dataset.id, "delete" ) }}">[Delete]</a>
         {% endif %}
         {% if dataset is not sameas (task.active_dataset) %}
-        <a onclick="CMS.AWSUtils.ajax_post('{{ url(" dataset", dataset.id, "autojudge" ) }}');">[{% if dataset.autojudge
+        <a onclick="CMS.AWSUtils.ajax_post('{{ url("dataset", dataset.id, "autojudge" ) }}');">[{% if dataset.autojudge
           %}Disable{% else %}Enable{% endif %} background judging]</a>
         {% endif %}
         {% endif %}
-        <a href="{{ url(" dataset", dataset.id) }}">[View results]</a>
+        <a href="{{ url("dataset", dataset.id) }}">[View results]</a>
       </p>
 
       <!-- Task type and score type settings -->
@@ -463,7 +463,7 @@ showTaskTypeOption({{ dataset.id }});
               title="Managers for this task. Managers are sources, headers, libraries or binaries used during the evaluation."></span>
             Managers
             {% if admin.permission_all %}
-            [<a href="{{ url(" dataset", dataset.id, "managers" , "add" ) }}">add</a>]
+            [<a href="{{ url("dataset", dataset.id, "managers" , "add" ) }}">add</a>]
             {% endif %}
           </td>
           <td>
@@ -472,8 +472,8 @@ showTaskTypeOption({{ dataset.id }});
             {% else %}
             {% for manager in itervalues(dataset.managers) %}
             <div class="manager">
-              <a href="{{ url(" file", manager.digest, manager.filename) }}">{{ manager.filename }}</a>
-              - <a onclick="CMS.AWSUtils.ajax_delete('{{ url(" dataset", dataset.id, "manager" , manager.id, "delete" )
+              <a href="{{ url("file", manager.digest, manager.filename) }}">{{ manager.filename }}</a>
+              - <a onclick="CMS.AWSUtils.ajax_delete('{{ url("dataset", dataset.id, "manager" , manager.id, "delete" )
                 }}');">Delete</a>
             </div>
             {% endfor %}
@@ -519,10 +519,10 @@ showTaskTypeOption({{ dataset.id }});
       <h4 id="title_testcases_{{ dataset.id }}" class="toggling_on">Test cases</h4>
       <div id="testcases_{{ dataset.id }}" class="task_dataset_testcases">
         {% if admin.permission_all %}
-        <a href="{{ url(" dataset", dataset.id, "testcases" , "add" ) }}">Add a testcase</a>
-        <a href="{{ url(" dataset", dataset.id, "testcases" , "add_multiple" ) }}">Add multiple testcases</a>
+        <a href="{{ url("dataset", dataset.id, "testcases" , "add" ) }}">Add a testcase</a>
+        <a href="{{ url("dataset", dataset.id, "testcases" , "add_multiple" ) }}">Add multiple testcases</a>
         {% endif %}
-        <a href="{{ url(" dataset", dataset.id, "testcases" , "download" ) }}">Download all testcases</a>
+        <a href="{{ url("dataset", dataset.id, "testcases" , "download" ) }}">Download all testcases</a>
         <table class="bordered" style="text-align:center">
           <thead>
             <tr>
@@ -544,15 +544,15 @@ showTaskTypeOption({{ dataset.id }});
                   %} />
               </td>
               <td>
-                <a href="javascript:void(0);" onclick="utils.show_file('input_{{ testcase.codename }}','{{ url(" file",
+                <a href="javascript:void(0);" onclick="utils.show_file('input_{{ testcase.codename }}','{{ url("file",
                   testcase.input, "input_%s" |format(testcase.codename)) }}')">Show input</a>
               </td>
               <td>
-                <a href="javascript:void(0);" onclick="utils.show_file('output_{{ testcase.codename }}','{{ url(" file",
+                <a href="javascript:void(0);" onclick="utils.show_file('output_{{ testcase.codename }}','{{ url("file",
                   testcase.output, "output_%s" |format(testcase.codename)) }}')">Show output</a>
               </td>
               <td>
-                <a onclick="CMS.AWSUtils.ajax_delete('{{ url(" dataset", dataset.id, "testcase" , testcase.id, "delete"
+                <a onclick="CMS.AWSUtils.ajax_delete('{{ url("dataset", dataset.id, "testcase" , testcase.id, "delete"
                   ) }}');">Delete</a>
               </td>
             </tr>
@@ -567,7 +567,7 @@ showTaskTypeOption({{ dataset.id }});
   <input type="submit" {% if not admin.permission_all %} disabled {% endif %} value="Update" />
   <input type="reset" value="Reset" />
 </form>
-<form action="{{ url(" tasks") }}" method="POST" style="display:inline;">
+<form action="{{ url("tasks") }}" method="POST" style="display:inline;">
   {{ xsrf_form_html|safe }}
   <input type="hidden" name="task_id" value="{{ task.id }}" />
   <input type="submit" name="operation" value="Remove" style="float: right;" {% if not admin.permission_all %} disabled

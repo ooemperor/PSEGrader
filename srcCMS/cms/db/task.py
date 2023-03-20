@@ -106,6 +106,11 @@ class Task(Base):
         Unicode,
         nullable=False)
 
+        # Tags of the Task
+    task_tags = Column(
+        Unicode,
+        nullable=True)
+
     # The names of the files that the contestant needs to submit (with
     # language-specific extensions replaced by "%l").
     submission_format = Column(
@@ -405,12 +410,6 @@ class Dataset(Base):
     task_type = Column(
         String,
         nullable=False)
-
-    # Tags of the Task
-    task_tags = Colum(
-        ARRAY(String),
-        nullable=True,
-        default=[])
 
     # Parameters for the task type class.
     task_type_parameters = Column(

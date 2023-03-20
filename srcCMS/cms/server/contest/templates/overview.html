@@ -180,7 +180,7 @@
                 </p>
 
                 {% if actual_phase == -1 %}
-                <form action="{{ contest_url(" start") }}" method="POST" style="margin: 0">
+                <form action="{{ contest_url("start") }}" method="POST" style="margin: 0">
                     {{ xsrf_form_html|safe }}
                     <input type="hidden" name="next" value="{{ contest_url() }}">
                     <button type="submit" class="btn btn-danger btn-large"
@@ -248,6 +248,7 @@
                 </td>
                 <td>{{ get_task_type(dataset=t_iter.active_dataset).name }}</td>
                 <td>{{ t_iter.submission_format|map("replace", ".%l", extensions)|join(" ") }}</td>
+                <td> {{ t_iter.task_tags }}</td>
                 {% if tokens_contest != TOKEN_MODE_DISABLED and tokens_tasks != TOKEN_MODE_DISABLED %}
                 <td>
                     {% if t_iter.token_mode == TOKEN_MODE_FINITE or t_iter.token_mode == TOKEN_MODE_INFINITE %}
@@ -256,7 +257,6 @@
                     {% trans %}No{% endtrans %}
                     {% endif %}
                 </td>
-                <td> {{ t_iter.task_tags }}</td>
                 {% endif %}
             </tr>
             {% endfor %}

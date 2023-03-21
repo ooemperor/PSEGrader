@@ -182,12 +182,6 @@ $(document).ready(function () {
             {{ score_type.format_score(public_score, score_type.max_public_score, none, task.score_precision, translation=translation) }}
         {% if is_score_partial %}
             <img src="{{ url("static", "loading.gif") }}" />
-        {% elif public_score==score_type.max_public_score %}
-            <img src="{{ url("static", "good_job_1.gif") }}"/>
-        {% elif public_score==0 %}
-            <img src="{{ url("static", "fail_1.gif") }}"/>
-        {% else %}
-            <img src="{{ url("static", "meh_1.gif") }}"/>
         {% endif %}
         </span>
     </div>
@@ -210,12 +204,6 @@ $(document).ready(function () {
             {{ score_type.format_score(tokened_score, score_type.max_score, none, task.score_precision, translation=translation) }}
             {% if is_score_partial %}
                 <img src="{{ url("static", "loading.gif") }}" />
-            {% elif public_score==score_type.max_public_score %}
-                <img src="{{ url("static", "good_job_1.gif") }}"/>
-            {% elif public_score==0 %}
-                <img src="{{ url("static", "fail_1.gif") }}"/>
-            {% else %}
-                <img src="{{ url("static", "meh_1.gif") }}"/>
             {% endif %}
         {% else %}
             {% trans %}N/A{% endtrans %}

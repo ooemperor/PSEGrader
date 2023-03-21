@@ -260,32 +260,6 @@ class ContestHandler(BaseHandler):
             .offset(int(submission_num) - 1) \
             .first()
     
-    def get_all_user_submissions(self, task):
-        """
-        Get all submissions for a given task for the given user. 
-        """
-        
-        return self.sql_session.query(Submission) \
-            .filter(Submission.participation == self.current_user) \
-            .filter(Submission.task == task)
-    
-    
-    def get_best_user_submission(self, task):
-        """
-        returning the best score for a user on a specific task. 
-        """
-        user_submissions = self.get_all_user_submissions(self, task)
-        score = 0
-        for submission in user_submissions:
-            if submission.get_result() is None:
-                continue
-            elif submission.get_result() > score:
-                score = submission.get_result()
-            else:
-                continue
-        return score
-
-
     def get_user_test(self, task, user_test_num):
         """Return the num-th contestant's test on the given task.
 

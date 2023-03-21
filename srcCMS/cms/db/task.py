@@ -281,11 +281,19 @@ class Task(Base):
         back_populates="task")
     
     def get_best_score_for_user(self, user):
+        """
+        getting the best score for a task and a given submission
+
+        Returns: 0 if no result found. Else the value of the score. 
+        """
         subs = self.submissions
         score = 0
         for sub in subs:
-            if user == sub.participation.user:
-                return sub.get_result()
+            if user == sub.participation.user && sub.get_result() is not None :
+                if sub.get_result() > score:
+                    score = sub.get_result()
+                else:
+                    continue
             else:
                 continue
         return score

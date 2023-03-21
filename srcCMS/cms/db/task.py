@@ -279,6 +279,18 @@ class Task(Base):
         cascade="all, delete-orphan",
         passive_deletes=True,
         back_populates="task")
+    
+    def get_best_score_for_user(self, user):
+        subs = self.submissions
+        score = 0
+        for sub in subs:
+            if user == sub.participation.user:
+                return sub.get_result()
+            else:
+                continue
+        return score
+
+
 
 
 class Statement(Base):

@@ -289,7 +289,7 @@ class Task(Base):
         subs = self.submissions
         score = 0
         for sub in subs:
-            if user == sub.participation.user && sub.get_result() is not None :
+            if user == sub.participation.user and sub.get_result() is not None :
                 if sub.get_result() > score:
                     score = sub.get_result()
                 else:

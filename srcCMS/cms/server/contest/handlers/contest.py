@@ -73,9 +73,6 @@ class ContestHandler(BaseHandler):
     def __init__(self, *args, **kwargs):
         super(ContestHandler, self).__init__(*args, **kwargs)
         self.contest_url = None
-        self.task_score_dict = {}
-        for t_iter in self.contest.tasks:
-            self.task_score_dict[t_iter] = self.get_best_user_submission(t_iter)
 
     def prepare(self):
         self.choose_contest()

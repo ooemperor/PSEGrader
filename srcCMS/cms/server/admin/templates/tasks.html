@@ -6,6 +6,21 @@
   <h1>Tasks list</h1>
 </div>
 
+<h2 id="title_filter_tasks" class="toggling_on">Search Filters</h2>
+<div id="filter_tasks">
+  <table id="filter_table">
+    <tr>
+      <td>Title</td>
+      <td><input type="text" name="filter_title" id="filter_title" onkeyup="filter_by_args()"/></td>
+    </tr>
+    <tr>
+      <td>Tag</td>
+      <td><input type="text" name="filter_tag" id="filter_tag" onkeyup="filter_by_args()"/></td>
+    </tr>
+  </table>
+  <div class="hr"></div>
+</div>
+
 <form action="{{ url("tasks") }}" method="POST">
   {{ xsrf_form_html|safe }}
   Edit selected task:
@@ -16,15 +31,16 @@
          disabled
 {% endif %}
          />
-  <table class="bordered">
+  <table id="data_table" class="bordered">
     <thead>
       <tr>
         <th></th>
         <th>Name</th>
         <th>Title</th>
+        <th>Tags</th>
       </tr>
     </thead>
-    <tbody>
+    <tbody id="data_table_body">
       {% for t in task_list %}
       <tr>
         <td>
@@ -32,10 +48,42 @@
         </td>
         <td><a href="{{ url("task", t.id) }}">{{ t.name }}</a></td>
         <td>{{ t.title }}</td>
+        <td>{{ t.task_tags }}</td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
 </form>
+
+
+<!--Script for the dynamic search of the users-->
+<script>
+  function filter_by_args(){
+    var input_title, input_tag, filter_title, filter_tag, table_body, tr, td, i, txtValue;
+
+    input_title = document.getElementById("filter_title");
+    input_tag = document.getElementById("filter_tag");
+    filter_title = input_title.value.toUpperCase();
+    filter_tag = input_tag.value.toUpperCase();
+    table_body = document.getElementById("data_table_body");
+    tr = table_body.getElementsByTagName("tr");
+
+
+    for (i = 0; i < tr.length; i++) {
+      td_tag = tr[i].getElementsByTagName("td")[3];
+      td_title = tr[i].getElementsByTagName("td")[1];
+      if (td_title && td_tag) {
+        txtValue_title = td_title.textContent || td_title.innerText;
+        txtValue_tag = td_tag.textContent || td_tag.innerText;
+        if (txtValue_title.toUpperCase().indexOf(filter_title) > -1
+        && txtValue_tag.toUpperCase().indexOf(filter_tag) > -1) {
+          tr[i].style.display = "";
+        } else {
+          tr[i].style.display = "none";
+        }
+      }
+    }
+  }
+</script>
 
 {% endblock core %}

@@ -60,6 +60,7 @@ class AddTaskHandler(SimpleHandler("add_task.html", permission_all=True)):
             self.get_string(attrs, "name", empty=None)
             assert attrs.get("name") is not None, "No task name specified."
             attrs["title"] = attrs["name"]
+            attrs["task_tags"] = ""
 
             # Set default submission format as ["taskname.%l"]
             attrs["submission_format"] = ["%s.%%l" % attrs["name"]]
@@ -132,6 +133,7 @@ class TaskHandler(BaseHandler):
 
             self.get_string(attrs, "name", empty=None)
             self.get_string(attrs, "title")
+            self.get_string(attrs, "task_tags", empty=None)
 
             assert attrs.get("name") is not None, "No task name specified."
 

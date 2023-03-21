@@ -256,7 +256,7 @@ class ContestHandler(BaseHandler):
             .order_by(Submission.timestamp) \
             .offset(int(submission_num) - 1) \
             .first()
-
+    
     def get_user_test(self, task, user_test_num):
         """Return the num-th contestant's test on the given task.
 

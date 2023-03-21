@@ -106,6 +106,11 @@ class Task(Base):
         Unicode,
         nullable=False)
 
+        # Tags of the Task
+    task_tags = Column(
+        Unicode,
+        nullable=True)
+
     # The names of the files that the contestant needs to submit (with
     # language-specific extensions replaced by "%l").
     submission_format = Column(
@@ -274,6 +279,26 @@ class Task(Base):
         cascade="all, delete-orphan",
         passive_deletes=True,
         back_populates="task")
+    
+    def get_best_score_for_user(self, user):
+        """
+        getting the best score for a task and a given submission
+
+        Returns: 0 if no result found. Else the value of the score. 
+        """
+        subs = self.submissions
+        score = 0
+        for sub in subs:
+            if user == sub.participation.user and sub.get_result() is not None :
+                if sub.get_result().score > score:
+                    score = sub.get_result().score
+                else:
+                    continue
+            else:
+                continue
+        return score
+
+
 
 
 class Statement(Base):

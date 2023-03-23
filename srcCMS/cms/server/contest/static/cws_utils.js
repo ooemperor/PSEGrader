@@ -380,6 +380,7 @@ CMS.CWSUtils.filter_languages = function(options, inputs) {
 };
 
 //Taken from https://www.w3schools.com/howto/howto_js_filter_table.asp
+//TODO: delete this?
 CMS.CWSUtils.filter_tags = function() {
     var input, filter, table, tr, td, i, txtValue, table_body;
     input = document.getElementById("tag_input");

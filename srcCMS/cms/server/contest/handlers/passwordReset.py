@@ -47,6 +47,10 @@ class PasswordResetHandler(ContestHandler):
     @tornado.web.authenticated
     @actual_phase_required(0)
     @multi_contest
+
+    def get(self):
+        self.render("passwordReset.html", **self.r_params)
+
     def post(self, user):
         fallback_page = self.contest_url()
 
@@ -56,7 +60,6 @@ class PasswordResetHandler(ContestHandler):
 
             user.password = hash_password(new_password, "bcrypt")
             self.sql_session.commit()
-
 
 
         except Exception as error:

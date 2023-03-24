@@ -44,12 +44,9 @@ class PasswordResetHandler(ContestHandler):
     Serves the password Reset interface
 
     """
-    @tornado.web.authenticated
-    @actual_phase_required(0)
     @multi_contest
-
     def get(self):
-        self.render("passwordReset.html", **self.r_params)
+        self.render("password_reset.html", **self.r_params)
 
     def post(self, user):
         fallback_page = self.contest_url()

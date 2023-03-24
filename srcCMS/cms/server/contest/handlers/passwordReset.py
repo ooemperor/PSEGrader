@@ -48,7 +48,7 @@ class PasswordResetHandler(ContestHandler):
     def get(self):
         self.render("password_reset.html", **self.r_params)
 
-    def post(self, user):
+    def post(self):
         fallback_page = self.contest_url()
 
         try:

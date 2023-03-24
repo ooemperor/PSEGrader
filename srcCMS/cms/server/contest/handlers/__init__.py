@@ -59,6 +59,7 @@ from .taskusertest import \
 from .communication import \
     CommunicationHandler, \
     QuestionHandler
+from .passwordReset import PasswordResetHandler
 
 
 HANDLERS = [
@@ -71,6 +72,7 @@ HANDLERS = [
     (r"/notifications", NotificationsHandler),
     (r"/printing", PrintingHandler),
     (r"/documentation", DocumentationHandler),
+    (r"/passwordReset", PasswordResetHandler),
 
     # Tasks
 

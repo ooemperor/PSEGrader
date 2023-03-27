@@ -23,6 +23,7 @@ future>=0.15,<0.16  # https://pypi.python.org/pypi/future
 babel==2.9.1  # http://babel.pocoo.org/en/latest/changelog.html
 pyxdg>=0.25,<0.26  # https://freedesktop.org/wiki/Software/pyxdg/
 Jinja2>=2.10,<2.11  # http://jinja.pocoo.org/docs/latest/changelog/
+secure-smtplib>=0.1.1 # for sending mails
 
 # Only for some importers:
 pyyaml>=3.12,<3.13  # http://pyyaml.org/wiki/PyYAML

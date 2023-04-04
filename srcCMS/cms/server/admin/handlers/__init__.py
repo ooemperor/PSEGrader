@@ -150,7 +150,7 @@ HANDLERS = [
 
     # Contest's Exercises
     (r"/contest/([0-9]+)/exercises", ContestExercisesHandler),
-    (r"/contest/([0-9]+)/exercises/add", AddContestExercisesHandler),
+    (r"/contest/([0-9]+)/exercises/add", AddContestExerciseHandler),
 
 
     # Contest's tasks

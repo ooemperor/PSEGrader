@@ -1,5 +1,5 @@
 import smtplib
-from srcCMS.cms.conf import config
+from cms.conf import config
 
 
 def sendMailNoAuth(receiver, subject, msg):

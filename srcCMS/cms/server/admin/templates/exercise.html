@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block core %}
+
+<div class="core_title">
+  <h1>{{ exercise.title }} ({{ exercise.name }})</h1>
+</div>
+
+
+<!-- We use "multipart/form-data" to have Tornado distinguish between missing and empty values. -->
+<form enctype="multipart/form-data" action="{{ url("exercise", exercise.id) }}" method="POST" style="display:inline;">
+  {{ xsrf_form_html|safe }}
+  <h2 id="title_exercise_configuration" class="toggling_on">Exercise configuration</h2>
+  <div id="exercise_configuration">
+    <table>
+      <tr>
+        <td colspan=2>
+          <h2>Exercise information</h2>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <span class="info"
+            title="A short name for the exercise, preferably using only letters, numbers and underscores."></span>
+          Name
+        </td>
+        <td><input type="text" name="name" value="{{ exercise.name }}" /></td>
+      </tr>
+      <tr>
+        <td>
+          <span class="info" title="The title of the exercise as seen by the contestants."></span>
+          Title
+        </td>
+        <td><input type="text" name="title" value="{{ exercise.title }}" /></td>
+      </tr>
+      <tr>
+      <tr>
+        <td>
+          <span class="info" title="The Tags of the Exercise as seen by the contestants."></span>
+          Tags
+        </td>
+        <td><input type="text" name="exercise_tags" value="{{ exercise.exercise_tags }}" /></td>
+      </tr>
+      <tr>
+        <td>
+          <span class="info"
+            title="The index of the exercise within the contest, if the exercise is associated with a contest."></span>
+          Position
+        </td>
+        <td>{{ exercise.num }}</td>
+      </tr>
+    </table>
+  </div>
+  <input type="submit" {% if not admin.permission_all %} disabled {% endif %} value="Update" />
+  <input type="reset" value="Reset" />
+</form>
+<form action="{{ url("exercises") }}" method="POST" style="display:inline;">
+  {{ xsrf_form_html|safe }}
+  <input type="hidden" name="exercise_id" value="{{ exercise.id }}" />
+  <input type="submit" name="operation" value="Remove" style="float: right;" {% if not admin.permission_all %} disabled
+    {% endif %} />
+</form>
+{% endblock core %}

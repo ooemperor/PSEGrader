@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block core %}
+
+<h1>New Exercise</h1>
+
+<h2 id="title_general_info" class="toggling_on">General information</h2>
+<div id="general_info">
+  <!-- We use "multipart/form-data" to have Tornado distinguish between missing and empty values. -->
+  <form enctype="multipart/form-data" action="{{ url("exercises", "add") }}" method="POST">
+    {{ xsrf_form_html|safe }}
+    <table>
+      <tr>
+        <td>
+          <span class="info" title="Title of the exercise."></span>
+          Title
+        </td>
+        <td><input type="text" name="title"/></td>
+      </tr>
+      <tr>
+        <td>
+          <span class="info" title="Name of the Exercise."></span>
+          Name
+        </td>
+        <td><input type="text" name="name" /></td>
+      </tr>
+      <tr>
+        <td>
+          <span class="info" title="Tags for the exercise, which shall be printed out. "></span>
+          Exercise Tags
+        </td>
+        <td><input type="text" name="exercise_tag" value=""></td>
+      </tr>
+    </table>
+    <input type="submit"/>
+    <input type="reset" value="Reset" />
+  </form>
+  <div class="hr"></div>
+</div>
+
+{% endblock core %}

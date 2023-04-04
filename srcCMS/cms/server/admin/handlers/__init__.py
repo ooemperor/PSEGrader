@@ -65,6 +65,11 @@ from .contestquestion import \
     QuestionClaimHandler
 from .contestranking import \
     RankingHandler
+from .exercise import \
+    ExerciseHandler, \
+    AddExerciseHandler, \
+    ExerciseListHandler, \
+    RemoveExerciseHandler
 from .task import \
     AddTaskHandler, \
     TaskHandler, \
@@ -140,6 +145,9 @@ HANDLERS = [
     (r"/contest/([0-9]+)/user/([0-9]+)/edit", ParticipationHandler),
     (r"/contest/([0-9]+)/user/([0-9]+)/message", MessageHandler),
 
+    # Contest's Exercises
+    #TODO Full Routing and Handler needed.
+
     # Contest's tasks
 
     (r"/contest/([0-9]+)/tasks", ContestTasksHandler),
@@ -168,6 +176,13 @@ HANDLERS = [
 
     (r"/contest/([0-9]+)/ranking", RankingHandler),
     (r"/contest/([0-9]+)/ranking/([a-z]+)", RankingHandler),
+
+    # Exercises
+    (r"/exercises", ExerciseListHandler),
+    (r"/exercises/add", AddExerciseHandler),
+    (r"/exercise/([0-9]+)/remove", RemoveExerciseHandler),
+    (r"/exercise/([0-9]+)", TaskHandler),
+
 
     # Tasks
 

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block core %}
+<div class="core_title">
+  <h1>Remove Exercise</h1>
+</div>
+
+{% if admin.permission_all %}
+<p>
+  Are you sure you want to remove Exercise {{ exercise.name }} from CMS, including all related data?
+  <br>
+  <br>
+  This operation cannot be undone.
+</p>
+<br>
+<a onclick="CMS.AWSUtils.ajax_delete('{{ url("exercises", exercise.id, "remove") }}');" class="button-link">Yes, remove</a>
+<a href="{{ url("exercises") }}" class="button-link">No</a>
+
+{% else %}
+You do not have permission to remove a task.
+{% endif %}
+
+{% endblock core %}

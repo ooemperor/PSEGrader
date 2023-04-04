@@ -5,10 +5,10 @@
   <h1>Exercise list of <a href="{{ url("contest", contest.id) }}">{{ contest.name }}</a></h1>
 </div>
 
-<form action="{{ url("contest", contest.id, "exercise", "add") }}" method="POST">
+<form action="{{ url("contest", contest.id, "exercises", "add") }}" method="POST">
   {{ xsrf_form_html|safe }}
   Add a new exercise:
-  <select name="task_id">
+  <select name="exercise_id">
     <option value="null" selected>Select a new exercise</option>
     {% for e in unassigned_exercises %}
     <option value="{{ e.id }}">
@@ -47,6 +47,7 @@
         <th></th>
         <th>Name</th>
         <th>Title</th>
+        <th>Exercise Tags</th>
       </tr>
     </thead>
     <tbody>
@@ -55,8 +56,9 @@
         <td>
           <input type="radio" name="exercise_id" value="{{ e.id }}"/>
         </td>
-        <td><a href="{{ url("exercise", e.id) }}">{{ e.name }}</a></td>
+        <td><a href="{{ url("exercises", e.id) }}">{{ e.name }}</a></td>
         <td>{{ e.title }}</td>
+        <td>{{ e.exercise_tags }}</td>
       </tr>
       {% endfor %}
     </tbody>

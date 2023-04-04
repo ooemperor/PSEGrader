@@ -121,7 +121,7 @@ class AddContestExerciseHandler(BaseHandler):
         exercise = self.safe_get_item(Exercise, exercise_id)
 
         # Assign the exercise to the contest.
-        exercise.num = len(self.contest.exercise)
+        exercise.num = len(self.contest.exercises)
         exercise.contest = self.contest
 
         if self.try_commit():

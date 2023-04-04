@@ -40,8 +40,7 @@ from sqlalchemy.schema import Column, ForeignKey, CheckConstraint, \
     UniqueConstraint, ForeignKeyConstraint
 from sqlalchemy.types import Boolean, Integer, Float, String, Unicode, \
     Interval, Enum, BigInteger
-from sqlalchemy.orm import relationship
-from sqlalchemy.orm.collections import attribute_mapped_collection
+from sqlalchemy.orm import relationship, attribute_mapped_collection
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 
 from cms import TOKEN_MODE_DISABLED, TOKEN_MODE_FINITE, TOKEN_MODE_INFINITE, \
@@ -108,7 +107,7 @@ class Task(Base):
 
     exercise = relationship(
         Exercise,
-        back_populate="tasks"
+        back_populates="tasks"
     )
 
     # Short name and long human readable title of the task.

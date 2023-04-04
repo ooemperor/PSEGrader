@@ -3,7 +3,7 @@
 {% block core %}
 
 <div class="core_title">
-  <h1>Users list</h1>
+  <h1>Exercise list</h1>
 </div>
 
 <!--
@@ -43,8 +43,8 @@
           <input type="radio" name="exercise_id" value="{{ e.id }}" />
         </td>
         <td><a href="{{ url("exercise", e.id) }}">{{ e.title }}</a></td>
-        <td>{{ e.first_name }}</td>
-        <td>{{ e.user_tag }}</td>
+        <td>{{ e.name }}</td>
+        <td>{{ e.exercise_tags }}</td>
       </tr>
       {% endfor %}
     </tbody>

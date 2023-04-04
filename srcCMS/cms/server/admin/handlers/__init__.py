@@ -49,6 +49,9 @@ from .contestuser import \
     AddContestUserHandler, \
     ParticipationHandler, \
     MessageHandler
+from .contestexercise import \
+    ContestExercisesHandler, \
+    AddContestExerciseHandler
 from .contesttask import \
     ContestTasksHandler, \
     AddContestTaskHandler
@@ -146,7 +149,9 @@ HANDLERS = [
     (r"/contest/([0-9]+)/user/([0-9]+)/message", MessageHandler),
 
     # Contest's Exercises
-    #TODO Full Routing and Handler needed.
+    (r"/contest/([0-9]+)/exercises", ContestExercisesHandler),
+    (r"/contest/([0-9]+)/exercises/add", AddContestExercisesHandler),
+
 
     # Contest's tasks
 
@@ -181,7 +186,7 @@ HANDLERS = [
     (r"/exercises", ExerciseListHandler),
     (r"/exercises/add", AddExerciseHandler),
     (r"/exercise/([0-9]+)/remove", RemoveExerciseHandler),
-    (r"/exercise/([0-9]+)", TaskHandler),
+    (r"/exercise/([0-9]+)", ExerciseHandler),
 
 
     # Tasks

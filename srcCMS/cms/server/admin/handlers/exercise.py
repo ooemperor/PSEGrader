@@ -112,7 +112,7 @@ class AddExerciseHandler(SimpleHandler("add_exercise.html", permission_all=True)
             assert attrs.get("name") is not None, "No exercise name specified."
             self.get_string(attrs, "title", empty=None)
             if attrs.get("title") is None:
-                attrs["title"] = None
+                attrs["title"] = attrs["name"]
             self.get_string(attrs, "exercise_tags", empty="")
 
             # Constructing the exercise and then adding to DB
@@ -140,6 +140,7 @@ class RemoveExerciseHandler(BaseHandler):
     def get(self, exercise_id):
         exercise = self.safe_get_item(Exercise, exercise_id)
 
+        self.render_params()
         self.r_params["exercise"] = exercise
         self.render("exercise_remove.html", **self.r_params)
 

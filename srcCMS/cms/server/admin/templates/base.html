@@ -140,13 +140,13 @@ $(document).ready(init);
 
         <h1><a class="menu_link" href="{{ url("exercises") }}">Exercises</a></h1>
         <ul class="menu">
-          {% if exercises_list|length < 1 %}
+          {% if exercise_list|length < 1 %}
           <li class="menu_entry">
             (no contests available)
           </li>
           {% endif %}
 
-          {% for c in exercise_list[:5] %}
+          {% for e in exercise_list[:5] %}
           <li class="menu_entry">
             <a class="menu_link bold" href="{{ url("exercise", e.id) }}" title="{{ e.title }}">
               {{ e.name }}

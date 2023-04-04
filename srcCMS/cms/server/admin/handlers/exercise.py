@@ -140,7 +140,7 @@ class RemoveExerciseHandler(BaseHandler):
     def get(self, exercise_id):
         exercise = self.safe_get_item(Exercise, exercise_id)
 
-        self.render_params()
+        self.r_params = self.render_params()
         self.r_params["exercise"] = exercise
         self.render("exercise_remove.html", **self.r_params)
 

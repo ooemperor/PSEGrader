@@ -136,6 +136,44 @@ $(document).ready(init);
 {% endif %}
         </ul>
 
+        <!--Begin of Contest -->
+
+        <h1><a class="menu_link" href="{{ url("exercises") }}">Exercises</a></h1>
+        <ul class="menu">
+          {% if exercises_list|length < 1 %}
+          <li class="menu_entry">
+            (no contests available)
+          </li>
+          {% endif %}
+
+          {% for c in exercise_list[:5] %}
+          <li class="menu_entry">
+            <a class="menu_link bold" href="{{ url("exercise", e.id) }}" title="{{ e.title }}">
+              {{ e.name }}
+            </a>
+          </li>
+          {% endfor %}
+
+          {% if exercise_list|length > 5 %}
+          <li>
+            <a class="menu_link" href="{{ url("exercises") }}">
+              (show more...)
+            </a>
+          </li>
+          {% endif %}
+
+{% if admin.permission_all %}
+          <li class="menu_entry">
+            <a class="menu_link" href="{{ url("exercises", "add") }}">
+              (create new contest...)
+            </a>
+          </li>
+{% endif %}
+        </ul>
+
+        <!--End of Contest -->
+
+
         <h1><a class="menu_link" href="{{ url("tasks") }}">Tasks</a></h1>
         <ul class="menu">
           {% if task_list|length < 1 %}

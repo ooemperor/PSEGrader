@@ -67,6 +67,8 @@ __all__ = [
     "Admin",
     # task
     "Task", "Statement", "Attachment", "Dataset", "Manager", "Testcase",
+    #Exercise
+    "Exercise",
     # submission
     "Submission", "File", "Token", "SubmissionResult", "Executable",
     "Evaluation",
@@ -105,6 +107,7 @@ from .fsobject import FSObject, LargeObject
 from .admin import Admin
 from .contest import Contest, Announcement
 from .user import User, Team, Participation, Message, Question
+from .exercise import Exercise
 from .task import Task, Statement, Attachment, Dataset, Manager, Testcase
 from .submission import Submission, File, Token, SubmissionResult, \
     Executable, Evaluation

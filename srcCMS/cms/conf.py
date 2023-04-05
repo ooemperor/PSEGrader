@@ -111,6 +111,12 @@ class Config(object):
         self.database_debug = False
         self.twophase_commit = False
 
+        # SMTP Mail Server Settings
+        self.smtpHost = "smtp.unibe.ch"
+        self.smtpPort = 25
+        self.smtpAuth = None
+        self.smtpSender = "grader@inf.unibe.ch"
+
         # Worker.
         self.keep_sandbox = True
         self.use_cgroups = False

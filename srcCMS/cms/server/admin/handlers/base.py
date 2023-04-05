@@ -50,7 +50,7 @@ from sqlalchemy.orm import subqueryload
 
 from cms import __version__, config
 from cms.db import Admin, Contest, Participation, Question, Submission, \
-    SubmissionResult, Task, Team, User, UserTest
+    SubmissionResult, Task, Team, User, UserTest, Exercise
 from cms.grading.scoretypes import get_score_type_class
 from cms.grading.tasktypes import get_task_type_class
 from cms.server import CommonRequestHandler, FileHandlerMixin
@@ -320,6 +320,7 @@ class BaseHandler(CommonRequestHandler):
                 .count()
         # TODO: not all pages require all these data.
         params["contest_list"] = self.sql_session.query(Contest).all()
+        params["exercise_list"] = self.sql_session.query(Exercise).all()
         params["task_list"] = self.sql_session.query(Task).all()
         params["user_list"] = self.sql_session.query(User).all()
         params["team_list"] = self.sql_session.query(Team).all()

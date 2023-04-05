@@ -49,7 +49,7 @@ from cms import TOKEN_MODE_DISABLED, TOKEN_MODE_FINITE, TOKEN_MODE_INFINITE, \
 from cmscommon.constants import \
     SCORE_MODE_MAX, SCORE_MODE_MAX_SUBTASK, SCORE_MODE_MAX_TOKENED_LAST
 
-from . import Codename, Filename, FilenameSchemaArray, Digest, Base, Contest
+from . import Codename, Filename, FilenameSchemaArray, Digest, Base, Contest, Exercise
 
 
 class Task(Base):
@@ -93,9 +93,23 @@ class Task(Base):
                    onupdate="CASCADE", ondelete="CASCADE"),
         nullable=True,
         index=True)
+
     contest = relationship(
         Contest,
         back_populates="tasks")
+
+    # Link to the exercise
+    exercise_id = Column(
+        Integer,
+        ForeignKey(Exercise.id, onupdate="CASCADE", ondelete="CASCADE"),
+        nullable=True,
+        index=True
+    )
+
+    exercise = relationship(
+        Exercise,
+        back_populates="tasks"
+    )
 
     # Short name and long human readable title of the task.
     name = Column(
@@ -279,12 +293,12 @@ class Task(Base):
         cascade="all, delete-orphan",
         passive_deletes=True,
         back_populates="task")
-    
+
     def get_best_score_for_user(self, user):
         """
         getting the best score for a task and a given submission
 
-        Returns: 0 if no result found. Else the value of the score. 
+        Returns: 0 if no result found. Else the value of the score.
         """
         subs = self.submissions
         score = 0

@@ -271,6 +271,16 @@ class Contest(Base):
         passive_deletes=True,
         back_populates="contest")
 
+    # one-to-many relationship for exercises
+    exercises = relationship(
+        "Exercise",
+        collection_class=ordering_list("num"),
+        order_by="[Exercise.num]",
+        cascade="all",
+        passive_deletes=True,
+        back_populates="contest"
+    )
+
     announcements = relationship(
         "Announcement",
         order_by="[Announcement.timestamp]",

@@ -49,6 +49,9 @@ from .contestuser import \
     AddContestUserHandler, \
     ParticipationHandler, \
     MessageHandler
+from .contestexercise import \
+    ContestExercisesHandler, \
+    AddContestExerciseHandler
 from .contesttask import \
     ContestTasksHandler, \
     AddContestTaskHandler
@@ -65,6 +68,11 @@ from .contestquestion import \
     QuestionClaimHandler
 from .contestranking import \
     RankingHandler
+from .exercise import \
+    ExerciseHandler, \
+    AddExerciseHandler, \
+    ExerciseListHandler, \
+    RemoveExerciseHandler
 from .task import \
     AddTaskHandler, \
     TaskHandler, \
@@ -75,6 +83,9 @@ from .task import \
     AttachmentHandler, \
     TaskListHandler, \
     RemoveTaskHandler
+from .exercisetask import \
+    ExerciseTasksHandler, \
+    AddExerciseTasksHandler
 from .dataset import \
     DatasetSubmissionsHandler, \
     CloneDatasetHandler, \
@@ -140,6 +151,11 @@ HANDLERS = [
     (r"/contest/([0-9]+)/user/([0-9]+)/edit", ParticipationHandler),
     (r"/contest/([0-9]+)/user/([0-9]+)/message", MessageHandler),
 
+    # Contest's Exercises
+    (r"/contest/([0-9]+)/exercises", ContestExercisesHandler),
+    (r"/contest/([0-9]+)/exercises/add", AddContestExerciseHandler),
+
+
     # Contest's tasks
 
     (r"/contest/([0-9]+)/tasks", ContestTasksHandler),
@@ -169,6 +185,13 @@ HANDLERS = [
     (r"/contest/([0-9]+)/ranking", RankingHandler),
     (r"/contest/([0-9]+)/ranking/([a-z]+)", RankingHandler),
 
+    # Exercises
+    (r"/exercises", ExerciseListHandler),
+    (r"/exercises/add", AddExerciseHandler),
+    (r"/exercise/([0-9]+)/remove", RemoveExerciseHandler),
+    (r"/exercise/([0-9]+)", ExerciseHandler),
+
+
     # Tasks
 
     (r"/tasks", TaskListHandler),
@@ -180,6 +203,10 @@ HANDLERS = [
     (r"/task/([0-9]+)/statement/([0-9]+)", StatementHandler),
     (r"/task/([0-9]+)/attachments/add", AddAttachmentHandler),
     (r"/task/([0-9]+)/attachment/([0-9]+)", AttachmentHandler),
+
+    # Exercise Task
+    (r"/exercise/([0-9]+)/tasks", ExerciseTasksHandler),
+    (r"/exercise/([0-9]+)/tasks/add", AddExerciseTasksHandler),
 
     # Datasets
 

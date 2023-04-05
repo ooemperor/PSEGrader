@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block core %}
+<div class="core_title">
+  <h1>Exercise list of <a href="{{ url("contest", contest.id) }}">{{ contest.name }}</a></h1>
+</div>
+
+<form action="{{ url("contest", contest.id, "exercises", "add") }}" method="POST">
+  {{ xsrf_form_html|safe }}
+  Add a new exercise:
+  <select name="exercise_id">
+    <option value="null" selected>Select a new exercise</option>
+    {% for e in unassigned_exercises %}
+    <option value="{{ e.id }}">
+      {{ e.name }}
+    </option>
+    {% endfor %}
+  </select>
+  <input type="submit"
+{% if not admin.permission_all %}
+         disabled
+{% endif %}
+         value="Add exercise" />
+</form>
+
+<form action="{{ url("contest", contest.id, "exercises") }}" method="POST">
+  {{ xsrf_form_html|safe }}
+  Edit selected task:
+  <input type="submit" name="operation"
+{% if not admin.permission_all %}
+         disabled
+{% endif %}
+         value="Move up" />
+  <input type="submit" name="operation"
+{% if not admin.permission_all %}
+         disabled
+{% endif %}
+         value="Move down" />
+  <input type="submit" name="operation"
+{% if not admin.permission_all %}
+         disabled
+{% endif %}
+         value="Remove from contest" />
+  <table class="bordered">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Name</th>
+        <th>Title</th>
+        <th>Exercise Tags</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for e in contest.exercises %}
+      <tr>
+        <td>
+          <input type="radio" name="exercise_id" value="{{ e.id }}"/>
+        </td>
+        <td><a href="{{ url("exercises", e.id) }}">{{ e.name }}</a></td>
+        <td>{{ e.title }}</td>
+        <td>{{ e.exercise_tags }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</form>
+{% endblock core %}

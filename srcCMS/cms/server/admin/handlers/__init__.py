@@ -83,6 +83,9 @@ from .task import \
     AttachmentHandler, \
     TaskListHandler, \
     RemoveTaskHandler
+from .exercisetask import \
+    ExerciseTasksHandler, \
+    AddExerciseTasksHandler
 from .dataset import \
     DatasetSubmissionsHandler, \
     CloneDatasetHandler, \
@@ -200,6 +203,10 @@ HANDLERS = [
     (r"/task/([0-9]+)/statement/([0-9]+)", StatementHandler),
     (r"/task/([0-9]+)/attachments/add", AddAttachmentHandler),
     (r"/task/([0-9]+)/attachment/([0-9]+)", AttachmentHandler),
+
+    # Exercise Task
+    (r"/exercise/([0-9]+)/tasks", ExerciseTasksHandler),
+    (r"/exercise/([0-9]+)/tasks/add", AddExerciseTasksHandler),
 
     # Datasets
 

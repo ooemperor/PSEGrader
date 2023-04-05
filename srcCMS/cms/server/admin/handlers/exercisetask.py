@@ -58,7 +58,7 @@ class ExerciseTasksHandler(BaseHandler):
         task = self.safe_get_item(Task, task_id)
         task2 = None
 
-        if operation == self.REMOVE_FROM_CONTEST:
+        if operation == self.REMOVE_FROM_EXERCISE:
             # Save the current task_num (position in the contest).
             task_num = task.num
 

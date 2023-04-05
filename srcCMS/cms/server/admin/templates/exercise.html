@@ -51,6 +51,12 @@
       </tr>
     </table>
   </div>
+<h2 id="title_exercise_task_configuration" class="toggling_on">Task/Exercise configuration</h2>
+  <div id="exercise_task_configuration">
+    <input type="submit" href="{{ url("exercise", e.id, "tasks") }}" {% if not admin.permission_all %} disabled {% endif %} value="Task/Exercise Configuration" />
+  </div>
+  <br>
+
   <input type="submit" {% if not admin.permission_all %} disabled {% endif %} value="Update" />
   <input type="reset" value="Reset" />
 </form>

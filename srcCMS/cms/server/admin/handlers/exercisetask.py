@@ -103,7 +103,7 @@ class ExerciseTasksHandler(BaseHandler):
 class AddExerciseTasksHandler(BaseHandler):
     @require_permission(BaseHandler.PERMISSION_ALL)
     def post(self, exercise_id):
-        fallback_page = self.url("contest", exercise_id, "tasks")
+        fallback_page = self.url("exercise", exercise_id, "tasks")
 
         self.exercise = self.safe_get_item(Exercise, exercise_id)
 

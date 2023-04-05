@@ -24,7 +24,7 @@ class ExerciseTasksHandler(BaseHandler):
 
     @require_permission(BaseHandler.AUTHENTICATED)
     def get(self, exercise_id):
-        self.contest = self.safe_get_item(Exercise, exercise_id)
+        self.exercise = self.safe_get_item(Exercise, exercise_id)
 
         self.r_params = self.render_params()
         self.r_params["exercise"] = self.exercise

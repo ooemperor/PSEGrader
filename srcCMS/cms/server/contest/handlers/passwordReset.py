@@ -13,6 +13,8 @@ from future.builtins.disabled import *  # noqa
 from future.builtins import *  # noqa
 
 import logging
+import random
+import string
 import re
 
 import tornado.web
@@ -29,6 +31,7 @@ from cmscommon.mimetypes import get_type_for_file_name
 from ..phase_management import actual_phase_required
 
 from .contest import ContestHandler, FileHandler
+from mail import sendMailNoAuth
 
 
 logger = logging.getLogger(__name__)
@@ -64,3 +67,44 @@ class PasswordResetHandler(ContestHandler):
             return
 
         self.redirect(fallback_page)
+
+class PasswordForgottenHandler(ContestHandler):
+    """
+        Handler for Forgotten Password which regenerates a new password.
+    """
+    @multi_contest
+    def get(self):
+        self.render("password_forgotten.html", **self.r_params)
+
+    def post(self):
+        error_args = {"password_forgot_error": "true"}
+        next_page = self.get_argument("next", None)
+        if next_page is not None:
+            error_args["next"] = next_page
+            if next_page != "/":
+                next_page = self.url(*next_page.strip("/").split("/"))
+            else:
+                next_page = self.url()
+        else:
+            next_page = self.contest_url()
+        error_page = self.contest_url(**error_args)
+
+        username = self.get_argument("username", "")
+
+        try:
+            #generate the new password.
+            new_password = ''.join(random.choice(string.ascii_letters) for i in range(8))
+            user_cur = self.sql_session.query(User).filter(User.username == username).first()
+            user_cur.password = hash_password(new_password, "bcrypt")
+            self.sql_session.commit()
+
+            #now sending new password in plaintext to user
+            sendMailNoAuth(user_cur.email, "Password Reset for Grader", f"Your password on the grader has been reset to: {new_password}\n If you have any questions please contact your Contest Administrator")
+
+
+
+        except Exception as err:
+            self.redirect(self.contest_url)
+            return
+
+        self.redirect(next_page)

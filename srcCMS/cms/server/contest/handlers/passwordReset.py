@@ -97,7 +97,8 @@ class PasswordForgottenHandler(ContestHandler):
 
 
         except Exception as err:
-            self.redirect(self.contest_url)
+            logger.warning(err)
+            self.redirect(next_page)
             return
 
         self.redirect(next_page)

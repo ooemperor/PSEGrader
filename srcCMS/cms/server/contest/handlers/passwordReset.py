@@ -79,7 +79,7 @@ class PasswordForgottenHandler(ContestHandler):
 
     def post(self):
         error_args = {"password_forgot_error": "true"}
-        next_page = self.url("login")
+        next_page = self.url("")
         error_page = self.url("passwordForgotten")
 
         username = self.get_argument("username", "")
@@ -101,4 +101,5 @@ class PasswordForgottenHandler(ContestHandler):
             self.redirect(next_page)
             return
 
+        logger.warning("Went through")
         self.redirect(next_page)

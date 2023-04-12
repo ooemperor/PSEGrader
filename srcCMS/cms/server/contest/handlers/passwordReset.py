@@ -80,7 +80,7 @@ class PasswordForgottenHandler(ContestHandler):
     def post(self, arg):
         error_args = {"password_forgot_error": "true"}
         next_page = self.contest_url()
-        error_page = self.url("passwordForgotten")
+        error_page = self.contest_url("passwordForgotten", **error_args)
 
         username = self.get_argument("username", "")
 
@@ -98,8 +98,8 @@ class PasswordForgottenHandler(ContestHandler):
 
         except Exception as err:
             logger.warning(err)
-            self.redirect(next_page)
+            self.redirect(error_page)
             return
 
-        logger.warning("Went through")
+        logger.info("Password has been reset for user: " + user_cur.username)
         self.redirect(next_page)

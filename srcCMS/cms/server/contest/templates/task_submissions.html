@@ -70,21 +70,25 @@ update_score = function(score_elem, task_score_elem,
     // Task score.
     var task_score_span = task_score_elem.find(".score");
     task_score_span.text(task_score_message);
+    var num = Math.floor(Math.random() * 3) + 1;
     if (task_score_is_partial) {
         task_score_span.append(
             $("<img class=\"details\" src=\"{{ url("static", "loading.gif") }}\"/>"));
     }
     else if (task_score == max_score){
+        var good_job_gif = "good_job_" + num + ".gif"
         task_score_span.append(
-            $("<img class=\"details\" src=\"{{ url("static", "good_job_1.gif") }}\"/>"));
+            $("<img class=\"details\" src=\"{{ url("static", good_job_gif) }}\"/>"));
     }
     else if (task_score == 0){
+        var fail_gif = "fail_" + num + ".gif"
         task_score_span.append(
-            $("<img class=\"details\" src=\"{{ url("static", "fail_1.gif") }}\"/>"));
+            $("<img class=\"details\" src=\"{{ url("static", fail_gif) }}\"/>"));
     }
     else {
+        var meh_gif = "meh_" + num + ".gif"
         task_score_span.append(
-            $("<img class=\"details\" src=\"{{ url("static", "meh_1.gif") }}\"/>"));
+            $("<img class=\"details\" src=\"{{ url("static", meh_gif) }}\"/>"));
     }
     task_score_elem.removeClass("undefined");
     task_score_elem.removeClass("score_0");

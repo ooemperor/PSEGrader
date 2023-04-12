@@ -88,12 +88,15 @@ class PasswordForgottenHandler(ContestHandler):
             #generate the new password.
             new_password = ''.join(random.choice(string.ascii_letters) for i in range(8))
             user_cur = self.sql_session.query(User).filter(User.username == username).first()
-            user_cur.password = hash_password(new_password, "bcrypt")
-            self.sql_session.commit()
+            if user_cur is not None:
+                user_cur.password = hash_password(new_password, "bcrypt")
+                self.sql_session.commit()
 
-            #now sending new password in plaintext to user
-            sendMailNoAuth(user_cur.email, "Password Reset for Grader", f"Your password on the grader has been reset to: {new_password}\n If you have any questions please contact your Contest Administrator")
+                #now sending new password in plaintext to user
+                sendMailNoAuth(user_cur.email, "Password Reset for Grader", f"Your password on the grader has been reset to: {new_password}\n If you have any questions please contact your Contest Administrator")
 
+            else:
+                self.redirect(error_page)
 
 
         except Exception as err:

@@ -10,13 +10,8 @@ def sendMailNoAuth(receiver, subject, msg):
     @param msg: The msg of the mail
     @return: True if successful, False if Error occurs.
     """
-    try:
-        with smtplib.SMTP(host=config.smtpHost, port=config.smtpPort) as server:
-            message_text = ("From: " + config.smtpSender + "\n" + "To: " + receiver + "\n" + "Subject: " + subject + "\n\n" + msg)
-            server.sendmail(sender, config.smtpSender, message_text)
+    server = smtplib.SMTP(host=config.smtpHost, port=config.smtpPort)
+    message_text = ("From: " + config.smtpSender + "\n" + "To: " + receiver + "\n" + "Subject: " + subject + "\n\n" + msg)
+    server.sendmail(config.smtpSender, config.smtpSender, message_text)
 
-            text = ("From: " + sender + " To: " + receiver + " Subject: " + subject)
-        return True
-
-    except Exception as err:
-        return False
+    text = ("From: " + config.smtpSender + " To: " + receiver + " Subject: " + subject)

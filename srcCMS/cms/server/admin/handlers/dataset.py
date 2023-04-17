@@ -45,6 +45,7 @@ import tornado.web
 
 from cms.db import Dataset, Manager, Message, Participation, \
     Session, Submission, Task, Testcase
+from cms.util import string_formatting
 from cms.grading.scoring import compute_changes_for_dataset
 from cmscommon.datetime import make_datetime
 from cmscommon.importers import import_testcases_from_zipfile
@@ -439,6 +440,7 @@ class AddTestcaseHandler(BaseHandler):
         task = dataset.task
 
         codename = self.get_argument("codename")
+        codename = string_formatting(codename)
 
         try:
             input_ = self.request.files["input"][0]

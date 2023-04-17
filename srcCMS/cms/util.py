@@ -340,3 +340,16 @@ def _get_shard_from_addresses(service, addrs):
         else:
             if not ipv6_addrs.isdisjoint(res_ipv6_addrs):
                 return shard
+
+def string_formatting(value):
+    """
+    Returns a formatted string, which does not contain the specified characters.
+    :param value: the string to format
+    :return: the formatted string
+    """
+    if isinstance(value, str):
+        characters = [" ", "!", "?", "/", ":", "^", "$"]
+        for char in characters:
+            value = value.replace(char, "")
+
+    return value

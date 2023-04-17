@@ -40,6 +40,8 @@ import traceback
 
 import tornado.web
 
+from cms.util import string_formatting
+
 from cms.db import Attachment, Dataset, Session, Statement, Submission, Task
 from cmscommon.datetime import make_datetime
 
@@ -59,6 +61,7 @@ class AddTaskHandler(SimpleHandler("add_task.html", permission_all=True)):
 
             self.get_string(attrs, "name", empty=None)
             assert attrs.get("name") is not None, "No task name specified."
+            attrs["name"] = string_formatting(attrs["name"])
             attrs["title"] = attrs["name"]
             attrs["task_tags"] = ""
 

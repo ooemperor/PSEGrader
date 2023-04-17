@@ -36,6 +36,7 @@ from future.builtins.disabled import *  # noqa
 from future.builtins import *  # noqa
 
 from cms.db import Contest, Participation, Submission, Team, User
+from cms.util import string_formatting
 from cmscommon.datetime import make_datetime
 from cmscommon.crypto import hash_password, parse_authentication
 
@@ -74,6 +75,7 @@ class UserHandler(BaseHandler):
             self.get_string(attrs, "first_name")
             self.get_string(attrs, "last_name")
             self.get_string(attrs, "username", empty=None)
+            attrs["username"] = string_formatting(attrs["username"])
 
             self.get_password(attrs, user.password, False)
 
@@ -240,6 +242,7 @@ class AddUserHandler(SimpleHandler("add_user.html", permission_all=True)):
             self.get_string(attrs, "first_name")
             self.get_string(attrs, "last_name")
             self.get_string(attrs, "username", empty=None)
+            attrs["username"] = string_formatting(attrs["username"])
 
             self.get_password(attrs, None, False)
 

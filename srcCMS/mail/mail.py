@@ -17,6 +17,3 @@ def sendMailNoAuth(receiver, subject, msg):
 
             text = ("From: " + sender + " To: " + receiver + " Subject: " + subject)
         return True
-
-    except Exception as err:
-        return False

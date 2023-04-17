@@ -36,6 +36,7 @@ from future.builtins.disabled import *  # noqa
 from future.builtins import *  # noqa
 
 from cms import ServiceCoord, get_service_shards, get_service_address
+from cms.util import string_formatting
 from cms.db import Contest, Participation, Submission
 from cmscommon.datetime import make_datetime
 
@@ -57,6 +58,7 @@ class AddContestHandler(
 
             self.get_string(attrs, "name", empty=None)
             assert attrs.get("name") is not None, "No contest name specified."
+            attrs["name"] = string_formatting(attrs["name"])
             attrs["description"] = attrs["name"]
 
             # Create the contest.
@@ -86,6 +88,7 @@ class ContestHandler(SimpleContestHandler("contest.html")):
             attrs = contest.get_attrs()
 
             self.get_string(attrs, "name", empty=None)
+            attrs["name"] = string_formatting(attrs["name"])
             self.get_string(attrs, "description")
 
             assert attrs.get("name") is not None, "No contest name specified."

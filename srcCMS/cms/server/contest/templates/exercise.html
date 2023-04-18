@@ -8,7 +8,7 @@
 <div class="span9">
 
     <div class="page-header">
-        <h1>{% trans %}{{ exercise.name }}{% endtrans %}</h1>
+        <h1>{{ exercise.name }}</h1>
     </div>
 
     <h2>{% trans %}General information{% endtrans %}</h2>
@@ -200,14 +200,7 @@
     <h2>{% trans %}Tasks of this exercise {% endtrans %}</h2>
 
     <table class="table table-bordered table-striped" id="exercise_tasks">
-        <!-- <colgroup>
-        <col class="task"/>
-        <col class="time_limit"/>
-        <col class="memory_limit"/>
-        <col class="n_inputs"/>
-        <col class="task_type"/>
-        <col class="files"/>
-    </colgroup> -->
+
         <thead>
             <tr>
                 <th>{% trans %}Task{% endtrans %}</th>
@@ -221,7 +214,7 @@
             "[%s]"|format(contest.languages|map("to_language")|map(attribute="source_extension")|unique|join("|")) %}
             {% for t_iter in exercise.tasks %}
             <tr>
-                <th>{{ t_iter.name }}</th>
+                <th><a href="{{ contest_url("tasks", t_iter.name, "description") }}">{{ t_iter.name }}<</a></th>
                 <td>{{ t_iter.title }}</td>
                 <td> {{ t_iter.task_tags }}</td>
                 <td>{{ t_iter.get_best_score_for_user(user) }}</td>

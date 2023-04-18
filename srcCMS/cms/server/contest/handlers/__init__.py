@@ -38,6 +38,8 @@ from .main import \
     NotificationsHandler, \
     PrintingHandler, \
     DocumentationHandler
+from .exercise import \
+    ExerciseOverviewHandler
 from .task import \
     TaskDescriptionHandler, \
     TaskStatementViewHandler, \
@@ -75,6 +77,8 @@ HANDLERS = [
     (r"/passwordReset", PasswordResetHandler),
     (r"/passwordForgotten", PasswordForgottenHandler),
 
+    # Exercise
+    (r"/exercises/(.*)", ExerciseOverviewHandler),
 
     # Tasks
 

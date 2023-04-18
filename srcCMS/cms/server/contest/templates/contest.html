@@ -52,7 +52,7 @@ $(document).ready(function () {
                 <div class="container">
                     <a class="brand" href="{{ contest_url() }}">{{ contest.description }}</a>
 {% if available_translations|length > 1 %}
-                    <p class="navbar-text pull-right">
+                                    <p class="navbar-text pull-right">
                         <select id="lang" class="form-control btn btn-info" onchange="utils.switch_lang()">
                             <option value=""{% if cookie_translation is none %} selected{% endif %}>{% trans lang=automatic_translation.name %}Automatic ({{ lang }}){% endtrans %}</option>
                         {% for lang_code, t in available_translations|dictsort(by="key") %}
@@ -62,10 +62,12 @@ $(document).ready(function () {
                     </p>
 {% endif %}
 {% if participation is defined %}
+
                     <form action="{{ contest_url("logout") }}" method="POST" class="navbar-form pull-right">
                         {{ xsrf_form_html|safe }}
                         <button type="submit" class="btn btn-warning">{% trans %}Logout{% endtrans %}</button>
                     </form>
+
                     <p class="navbar-text pull-right">
                         {% trans first_name=user.first_name,
                                  last_name=user.last_name,
@@ -154,14 +156,6 @@ $(document).ready(function () {
         <div id="main" class="container">
             <div class="row">
                 <div class="span3">
-                    <h3 id="server_time_box">
-                        <span id="server_time_label">{% trans %}Server time:{% endtrans %}</span>
-                        <span id="server_time"></span>
-                    </h3>
-                    <h3 id="countdown_box">
-                        <span id="countdown_label"></span>
-                        <span id="countdown"></span>
-                    </h3>
                     <div class="well" style="padding: 8px 0;">
                         <ul class="nav nav-list">
 

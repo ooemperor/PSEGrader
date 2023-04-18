@@ -1,0 +1,46 @@
+{% extends "contest.html" %}
+
+{% set page = "exercise" %}
+
+{% block core %}
+
+
+<div class="span9">
+
+    <div class="page-header">
+        <h1>{{ exercise.name }}</h1>
+    </div>
+
+    <h2>{% trans %}General information{% endtrans %}</h2>
+
+    {% if actual_phase == 0 or actual_phase == 3%}
+    <h2>{% trans %}Tasks of this exercise {% endtrans %}</h2>
+
+    <table class="table table-bordered table-striped" id="exercise_tasks">
+
+        <thead>
+            <tr>
+                <th>{% trans %}Exercise{% endtrans %}</th>
+                <th>{% trans %}Name{% endtrans %}</th>
+                <th>{% trans %}Tags{% endtrans %}</th>
+                <th>{% trans %}Score{% endtrans %}</th>
+            </tr>
+        </thead>
+        <tbody id="data_table_body">
+            {% set extensions =
+            "[%s]"|format(contest.languages|map("to_language")|map(attribute="source_extension")|unique|join("|")) %}
+            {% for t_iter in exercise.tasks %}
+            <tr>
+                <th><a href="{{ contest_url("tasks", t_iter.name, "submissions") }}">{{ t_iter.name }}</a></th>
+                <td>{{ t_iter.title }}</td>
+                <td> {{ t_iter.task_tags }}</td>
+                <td>{{ t_iter.get_best_score_for_user(user) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+</div>
+
+{% endblock core %}

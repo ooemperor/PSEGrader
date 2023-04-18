@@ -218,7 +218,7 @@
                 <th><a href="{{ contest_url("exercises", e_iter.name) }}">{{ e_iter.name }}</a></th>
                 <td>{{ e_iter.title }}</td>
                 <td> {{ e_iter.exercise_tags }}</td>
-                <td>Not yet implemented</td>
+                <td>{{ self.get_total_score_of_exercise(e_iter) }}</td>
             </tr>
             {% endfor %}
         </tbody>

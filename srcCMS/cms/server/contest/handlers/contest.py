@@ -44,7 +44,7 @@ import logging
 import tornado.web
 
 from cms import config, TOKEN_MODE_MIXED
-from cms.db import Contest, Submission, Task, UserTest, Exercise
+from cms.db import Contest, Submission, Task, UserTest, Exercise, Dataset
 from cms.server import FileHandlerMixin
 from cms.locale import filter_language_codes
 from cms.server.contest.authentication import authenticate_request
@@ -249,6 +249,29 @@ class ContestHandler(BaseHandler):
             .filter(Exercise.contest == self.contest) \
             .filter(Exercise.name == exercise_name) \
             .one_or_none()
+
+    def get_total_score_of_exercise(self, exercise):
+        """
+        Calculting the sum of the scores of a exercise
+        @param exercise: the exercise
+        @return: the total score of the exercise
+        """
+        sum = 0
+        for task in exercise.tasks:
+            sum += task.get_best_score_for_user()
+        return sum
+
+    def get_max_score_of_exercise(self, exercise):
+        """
+        Getting the maximal avaible points of a exercise
+        @param exercise: the exercise the max score shall be calculated for
+        @return: the maximum score
+        """
+        sum = 0
+        for task in exercise.tasks:
+            sum += task.active_dataset.score_type_object.max_score
+        return sum
+
 
 
     def get_submission(self, task, submission_num):

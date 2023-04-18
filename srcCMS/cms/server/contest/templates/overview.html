@@ -222,7 +222,7 @@
                 <th><a href="{{ contest_url("exercises", e_iter.name) }}">{{ e_iter.name }}</a></th>
                 <td>{{ e_iter.title }}</td>
                 <td> {{ e_iter.exercise_tags }}</td>
-                <td>{{ points }}</td>
+                <td>{{ e_iter | sum(e_iter.tasks.get_best_score_for_user(user)) }}</td>
             </tr>
             {% endfor %}
         </tbody>

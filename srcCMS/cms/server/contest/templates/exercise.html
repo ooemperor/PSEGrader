@@ -8,7 +8,7 @@
 <div class="span9">
 
     <div class="page-header">
-        <h1>{% trans %}Overview{% endtrans %}</h1>
+        <h1>{% trans %}{{ exercise.name }}{% endtrans %}</h1>
     </div>
 
     <h2>{% trans %}General information{% endtrans %}</h2>
@@ -197,11 +197,9 @@
 
 
     {% if actual_phase == 0 or actual_phase == 3%}
-    <h2>{% trans %}Exercise overview{% endtrans %}</h2>
+    <h2>{% trans %}Tasks of this exercise {% endtrans %}</h2>
 
-    <input type="text" id="tag_input" onkeyup="filter_by_tag()" placeholder="Search for exercise tags...">
-
-    <table class="table table-bordered table-striped" id="exercise_overview">
+    <table class="table table-bordered table-striped" id="exercise_tasks">
         <!-- <colgroup>
         <col class="task"/>
         <col class="time_limit"/>
@@ -221,12 +219,12 @@
         <tbody id="data_table_body">
             {% set extensions =
             "[%s]"|format(contest.languages|map("to_language")|map(attribute="source_extension")|unique|join("|")) %}
-            {% for e_iter in contest.exercises %}
+            {% for t_iter in exercise.tasks %}
             <tr>
-                <th><a href="{{ contest_url("exercises", e_iter.name) }}">{{ e_iter.name }}</a></th>
-                <td>{{ e_iter.title }}</td>
-                <td> {{ e_iter.exercise_tags }}</td>
-                <td>Not yet implemented</td>
+                <th>{{ t_iter.name }}</th>
+                <td>{{ t_iter.title }}</td>
+                <td> {{ t_iter.task_tags }}</td>
+                <td>{{ t_iter.get_best_score_for_user(user) }}</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -234,27 +232,5 @@
     {% endif %}
 
 </div>
-<script>
-  function filter_by_tag(){
-    var input, filter, table, tr, td, i, txtValue, table_body;
-    input = document.getElementById("tag_input");
-    filter = input.value.toUpperCase();
-    table = document.getElementById("exercise_overview");
-    table_body = document.getElementById("data_table_body");
-    tr = table_body.getElementsByTagName("tr");
 
-    // Loop through all table rows, and hide those who don't match the search query
-    for (i = 0; i < tr.length; i++) {
-      td = tr[i].getElementsByTagName("td")[2];
-      if (td) {
-        txtValue = td.textContent || td.innerText;
-        if (txtValue.toUpperCase().indexOf(filter) > -1) {
-          tr[i].style.display = "";
-        } else {
-          tr[i].style.display = "none";
-        }
-      }
-    }
-  }
-</script>
 {% endblock core %}

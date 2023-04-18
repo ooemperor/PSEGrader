@@ -214,15 +214,16 @@
             {% set extensions =
             "[%s]"|format(contest.languages|map("to_language")|map(attribute="source_extension")|unique|join("|")) %}
             {% for e_iter in contest.exercises %}
-            {% set points = 0 %}
+            {% set ns = namespace(points=0) %}
             <tr>
                 {% for t_iter in e_iter.tasks %}
-                  {% set points = points + t_iter.get_best_score_for_user(user) %}
+                  {% set ns.points = ns.points + t_iter.get_best_score_for_user(user) %}
+                  
                 {% endfor %}
                 <th><a href="{{ contest_url("exercises", e_iter.name) }}">{{ e_iter.name }}</a></th>
                 <td>{{ e_iter.title }}</td>
                 <td> {{ e_iter.exercise_tags }}</td>
-                <td>{{ points }}</td>
+                <td>{{ ns.points }}</td>
             </tr>
             {% endfor %}
         </tbody>

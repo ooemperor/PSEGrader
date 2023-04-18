@@ -171,15 +171,16 @@ $(document).ready(function () {
                                 <a href="{{ contest_url("passwordReset") }}">{% trans %}Password Change{% endtrans %}</a>
                             </li>
     {% if actual_phase == 0 or actual_phase == 3 or participation.unrestricted %}
-        {% for t_iter in contest.tasks %}
+        {% for e_iter in contest.exercises %}
                             <li class="nav-header">
-                                {{ t_iter.name }}
-                            </li>
-                            <li{% if page == "task_description" and task == t_iter %} class="active"{% endif %}>
-                                <a href="{{ contest_url("tasks", t_iter.name, "description") }}">{% trans %}Statement{% endtrans %}</a>
-                            </li>
-                            <li{% if page == "task_submissions" and task == t_iter %} class="active"{% endif %}>
-                                <a href="{{ contest_url("tasks", t_iter.name, "submissions") }}">{% trans %}Submissions{% endtrans %}</a>
+                                <a href="{{ contest_url("exercises", e_iter.name) }}">{{ e_iter.name }}</a>
+                                {% if page == "exercise" and exercise == e_iter or page == "task_submissions" and e_iter.tasks.__contains__(task) %}
+                                  {% for t_iter in e_iter.tasks %}
+                                    <li {% if page == "task_submissions" and task == t_iter %} class="active"  {% endif %}>
+                                      <a href="{{ contest_url("tasks", t_iter.name, "submissions") }}" style="text-indent: 20px;">{{ t_iter.name }}</a>
+                                    </li>
+                                  {% endfor %}
+                                {% endif %}
                             </li>
         {% endfor %}
     {% endif %}
@@ -202,10 +203,7 @@ $(document).ready(function () {
                         </ul>
                     </div>
                     <span class="license_notice">
-                    <a href="http://github.com/cms-dev/cms/" rel="author noreferrer" target="_blank">{% trans %}Contest Management System{% endtrans %}</a>
-                    {% trans %}is released under the{% endtrans %}
-                    <a href="http://www.gnu.org/licenses/agpl" rel="license noreferrer" target="_blank">{% trans %}GNU Affero General Public License{% endtrans %}</a>
-                    .
+                    <a href="https://github.com/ooemperor/PSEGrader" rel="author noreferrer" target="_blank">{% trans %}Github{% endtrans %}</a>
                     </span>
                 </div>
     {% block core %}{% endblock core %}

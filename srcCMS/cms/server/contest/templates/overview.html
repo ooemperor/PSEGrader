@@ -214,8 +214,8 @@
             {% set extensions =
             "[%s]"|format(contest.languages|map("to_language")|map(attribute="source_extension")|unique|join("|")) %}
             {% for e_iter in contest.exercises %}
+            {% set points = 0 %}
             <tr>
-                {% set points = 0 %}
                 {% for t_iter in e_iter.tasks %}
                   {% set points = points + t_iter.get_best_score_for_user(user) %}
                 {% endfor %}

@@ -201,7 +201,7 @@
 
     <input type="text" id="tag_input" onkeyup="filter_by_tag()" placeholder="Search for task tags...">
 
-    <table class="table table-bordered table-striped" id="task_overview">
+    <table class="table table-bordered table-striped" id="exercise_overview">
         <!-- <colgroup>
         <col class="task"/>
         <col class="time_limit"/>
@@ -214,52 +214,19 @@
             <tr>
                 <th>{% trans %}Task{% endtrans %}</th>
                 <th>{% trans %}Name{% endtrans %}</th>
-                <th>{% trans %}Time limit{% endtrans %}</th>
-                <th>{% trans %}Memory limit{% endtrans %}</th>
-                <th>{% trans %}Type{% endtrans %}</th>
-                <th>{% trans %}Files{% endtrans %}</th>
                 <th>{% trans %}Tags{% endtrans %}</th>
                 <th>{% trans %}Score{% endtrans %}</th>
-
-                {% if tokens_contest != TOKEN_MODE_DISABLED and tokens_tasks != TOKEN_MODE_DISABLED %}
-                <th>{% trans %}Tokens{% endtrans %}</th>
-                {% endif %}
             </tr>
         </thead>
         <tbody id="data_table_body">
             {% set extensions =
             "[%s]"|format(contest.languages|map("to_language")|map(attribute="source_extension")|unique|join("|")) %}
-            {% for t_iter in contest.tasks %}
+            {% for e_iter in contest.exercises %}
             <tr>
-                <th>{{ t_iter.name }}</th>
-                <td>{{ t_iter.title }}</td>
-                <td>
-                    {% if t_iter.active_dataset.time_limit is not none %}
-                    {{ t_iter.active_dataset.time_limit|format_duration(length="long") }}
-                    {% else %}
-                    {% trans %}N/A{% endtrans %}
-                    {% endif %}
-                </td>
-                <td>
-                    {% if t_iter.active_dataset.memory_limit is not none %}
-                    {{ (t_iter.active_dataset.memory_limit * 1024 * 1024)|format_size }}
-                    {% else %}
-                    {% trans %}N/A{% endtrans %}
-                    {% endif %}
-                </td>
-                <td>{{ get_task_type(dataset=t_iter.active_dataset).name }}</td>
-                <td>{{ t_iter.submission_format|map("replace", ".%l", extensions)|join(" ") }}</td>
-                <td> {{ t_iter.task_tags }}</td>
-                <td>{{ t_iter.get_best_score_for_user(user) }}</td>
-                {% if tokens_contest != TOKEN_MODE_DISABLED and tokens_tasks != TOKEN_MODE_DISABLED %}
-                <td>
-                    {% if t_iter.token_mode == TOKEN_MODE_FINITE or t_iter.token_mode == TOKEN_MODE_INFINITE %}
-                    {% trans %}Yes{% endtrans %}
-                    {% else %}
-                    {% trans %}No{% endtrans %}
-                    {% endif %}
-                </td>
-                {% endif %}
+                <th>{{ e_iter.name }}</th>
+                <td>{{ e_iter.title }}</td>
+                <td> {{ e_iter.exercise_tags }}</td>
+                <td>Not yet implemented</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -272,7 +239,7 @@
     var input, filter, table, tr, td, i, txtValue, table_body;
     input = document.getElementById("tag_input");
     filter = input.value.toUpperCase();
-    table = document.getElementById("task_overview");
+    table = document.getElementById("exercise_overview");
     table_body = document.getElementById("data_table_body");
     tr = table_body.getElementsByTagName("tr");
 

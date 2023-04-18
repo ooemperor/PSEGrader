@@ -199,7 +199,7 @@
     {% if actual_phase == 0 or actual_phase == 3%}
     <h2>{% trans %}Exercise overview{% endtrans %}</h2>
 
-    <input type="text" id="tag_input" onkeyup="filter_by_tag()" placeholder="Search for task tags...">
+    <input type="text" id="tag_input" onkeyup="filter_by_tag()" placeholder="Search for exercise tags...">
 
     <table class="table table-bordered table-striped" id="exercise_overview">
         <!-- <colgroup>
@@ -245,7 +245,7 @@
 
     // Loop through all table rows, and hide those who don't match the search query
     for (i = 0; i < tr.length; i++) {
-      td = tr[i].getElementsByTagName("td")[5];
+      td = tr[i].getElementsByTagName("td")[2];
       if (td) {
         txtValue = td.textContent || td.innerText;
         if (txtValue.toUpperCase().indexOf(filter) > -1) {

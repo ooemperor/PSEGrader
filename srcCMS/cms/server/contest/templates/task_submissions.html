@@ -261,6 +261,76 @@ $(document).ready(function () {
 </div>
 {% endif %}
 
+<h2>{% trans %}Statement{% endtrans %}</h2>
+
+{% if task.statements|length == 0 %}
+<div class="row statement no_statements">
+    <div class="span9">
+        {% trans %}no statement available{% endtrans %}
+    </div>
+</div>
+{% elif task.statements|length == 1 %}
+<div class="row statement one_statement">
+    <div class="span9">
+    {% for lang_code in task.statements %}
+        <a href="{{ contest_url("tasks", task.name, "statements", lang_code) }}" class="btn btn-large btn-success">{% trans %}Download task statement{% endtrans %}</a>
+    {% endfor %}
+    </div>
+</div>
+{% else %}
+<div class="statement many_statements">
+    <div class="main_statements">
+        <p>
+            {% trans %}The statement for this task is available in multiple versions, in different languages.{% endtrans %}
+            {% trans %}You can see (and download) all of them using the list on the right.{% endtrans %}
+            {% trans %}Some suggested translations follow.{% endtrans %}
+        </p>
+    {% for statement in itervalues(task.statements)|sort(attribute="language") %}
+        {% if statement.language in task.primary_statements %}
+        <a href="{{ contest_url("tasks", task.name, "statements", statement.language) }}" class="btn btn-large btn-success">
+            {% set language_name = statement.language|format_locale %}
+            {% if statement.language != language_name %}
+                {% trans lang=language_name %}Statement in <b>{{ lang }}</b>{% endtrans %}
+            {% else %}
+                {% trans lang=language_name %}Statement in {{ lang }}{% endtrans %}
+            {% endif %}
+        </a>
+        {% endif %}
+    {% endfor %}
+    {% for statement in itervalues(task.statements)|sort(attribute="language") %}
+        {% if statement.language in participation.user.preferred_languages and statement.language not in task.primary_statements %}
+        <a href="{{ contest_url("tasks", task.name, "statements", statement.language) }}" class="btn btn-large">
+            {% set language_name = statement.language|format_locale %}
+            {% if statement.language != language_name %}
+                {% trans lang=language_name %}Statement in <b>{{ lang }}</b>{% endtrans %}
+            {% else %}
+                {% trans lang=language_name %}Statement in {{ lang }}{% endtrans %}
+            {% endif %}
+        </a>
+        {% endif %}
+    {% endfor %}
+    </div>
+    <div class="all_statements well">
+        <div>
+            <ul>
+    {% for statement in itervalues(task.statements)|sort(attribute="language") %}
+                <li>
+                    <a href="{{ contest_url("tasks", task.name, "statements", statement.language) }}">
+        {% set language_name = statement.language|format_locale %}
+        {% if statement.language != language_name %}
+            {% trans lang=language_name %}<b>{{ lang }}</b>{% endtrans %}
+        {% else %}
+            {% trans lang=language_name %}{{ lang }}{% endtrans %}
+        {% endif %}
+                    </a>
+                </li>
+    {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <h2 style="margin-bottom: 10px">{% trans %}Submit a solution{% endtrans %}</h2>
 
 {% set task_type = get_task_type(dataset=task.active_dataset) %}

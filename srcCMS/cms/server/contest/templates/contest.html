@@ -51,21 +51,11 @@ $(document).ready(function () {
             <div class="navbar-inner">
                 <div class="container">
                     <a class="brand" href="{{ contest_url() }}">{{ contest.description }}</a>
-{% if available_translations|length > 1 %}
-                                    <p class="navbar-text pull-right">
-                        <select id="lang" class="form-control btn btn-info" onchange="utils.switch_lang()">
-                            <option value=""{% if cookie_translation is none %} selected{% endif %}>{% trans lang=automatic_translation.name %}Automatic ({{ lang }}){% endtrans %}</option>
-                        {% for lang_code, t in available_translations|dictsort(by="key") %}
-                            <option value="{{ lang_code }}"{% if t == cookie_translation %} selected{% endif %}>{{ t.name }}</option>
-                        {% endfor %}
-                        </select>
-                    </p>
-{% endif %}
-{% if participation is defined %}
 
+              {% if participation is defined %}
                     <form action="{{ contest_url("logout") }}" method="POST" class="navbar-form pull-right">
                         {{ xsrf_form_html|safe }}
-                        <button type="submit" class="btn btn-warning">{% trans %}Logout{% endtrans %}</button>
+                        <button type="submit" class="btn btn-primary">{% trans %}Logout{% endtrans %}</button>
                     </form>
 
                     <p class="navbar-text pull-right">
@@ -75,7 +65,7 @@ $(document).ready(function () {
                             Logged in as <strong>{{ first_name }} {{ last_name }}</strong> <em>({{ username }})</em>
                         {% endtrans %}
                     </p>
-{% endif %}
+              {% endif %}
                 </div>
             </div>
         </div>
@@ -167,8 +157,8 @@ $(document).ready(function () {
                                     <span id="unread_count" class="label label-warning no_unread"></span>
                                 </a>
                             </li>
-                            <li{% if page == "passwordReset" %} class="active"{% endif %}>
-                                <a href="{{ contest_url("passwordReset") }}">{% trans %}Password Change{% endtrans %}</a>
+                            <li{% if page == "settings" %} class="active"{% endif %}>
+                                <a href="{{ contest_url("settings") }}">{% trans %}Settings{% endtrans %}</a>
                             </li>
     {% if actual_phase == 0 or actual_phase == 3 or participation.unrestricted %}
         {% for e_iter in contest.exercises %}
@@ -203,7 +193,10 @@ $(document).ready(function () {
                         </ul>
                     </div>
                     <span class="license_notice">
-                    <a href="https://github.com/ooemperor/PSEGrader" rel="author noreferrer" target="_blank">{% trans %}Github{% endtrans %}</a>
+                    <a href="http://github.com/cms-dev/cms/" rel="author noreferrer" target="_blank">{% trans %}Contest Management System{% endtrans %}</a>
+                    {% trans %}is released under the{% endtrans %}
+                    <a href="http://www.gnu.org/licenses/agpl" rel="license noreferrer" target="_blank">{% trans %}GNU Affero General Public License{% endtrans %}</a>
+                    .
                     </span>
                 </div>
     {% block core %}{% endblock core %}

@@ -216,13 +216,13 @@
             {% for e_iter in contest.exercises %}
             <tr>
                 {% set points = 0 %}
-                {% for task in e_iter.tasks %}
-                  {% set points = points + task.get_best_score_for_user(user) %}
+                {% for t_iter in e_iter.tasks %}
+                  {% set points = points + t_iter.get_best_score_for_user(user) %}
                 {% endfor %}
                 <th><a href="{{ contest_url("exercises", e_iter.name) }}">{{ e_iter.name }}</a></th>
                 <td>{{ e_iter.title }}</td>
                 <td> {{ e_iter.exercise_tags }}</td>
-                <td>{{ e_iter | sum(e_iter.tasks.get_best_score_for_user(user)) }}</td>
+                <td>{{ points }}</td>
             </tr>
             {% endfor %}
         </tbody>

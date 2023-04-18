@@ -1,7 +1,5 @@
 {% extends "contest.html" %}
 
-{% set page = "overview" %}
-
 {% block core %}
 
 
@@ -12,7 +10,7 @@
     </div>
 
     <h2>{% trans %}General information{% endtrans %}</h2>
-  
+
     {% if actual_phase == 0 or actual_phase == 3%}
     <h2>{% trans %}Tasks of this exercise {% endtrans %}</h2>
 

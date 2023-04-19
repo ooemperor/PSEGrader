@@ -50,7 +50,7 @@ from cms import TOKEN_MODE_DISABLED, TOKEN_MODE_FINITE, TOKEN_MODE_INFINITE, \
 from cmscommon.constants import \
     SCORE_MODE_MAX, SCORE_MODE_MAX_SUBTASK, SCORE_MODE_MAX_TOKENED_LAST
 
-from . import Codename, Filename, FilenameSchemaArray, Digest, Base, Contest, Exercise
+from . import Codename, Filename, FilenameSchemaArray, Digest, Base, Contest
 
 
 class Exercise(Base):

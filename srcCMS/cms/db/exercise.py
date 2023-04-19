@@ -24,7 +24,6 @@ from cmscommon.crypto import generate_random_password, build_password
 
 from . import CastingArray, Codename, Base, Admin, Contest
 
-
 class Exercise(Base):
     """
     Class to store a exercise.
@@ -88,4 +87,10 @@ class Exercise(Base):
         passive_deletes=True,
         back_populates="exercise"
     )
+
+    def get_best_user_scores_sum(self, user):
+        sum = 0
+        for task in self.tasks:
+            sum += task.get_best_score_for_user(user)
+        return sum
 

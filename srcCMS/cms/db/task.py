@@ -42,6 +42,7 @@ from sqlalchemy.types import Boolean, Integer, Float, String, Unicode, \
     Interval, Enum, BigInteger
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm.collections import attribute_mapped_collection
+from sqlalchemy.ext.orderinglist import ordering_list
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 
 from cms import TOKEN_MODE_DISABLED, TOKEN_MODE_FINITE, TOKEN_MODE_INFINITE, \
@@ -50,6 +51,77 @@ from cmscommon.constants import \
     SCORE_MODE_MAX, SCORE_MODE_MAX_SUBTASK, SCORE_MODE_MAX_TOKENED_LAST
 
 from . import Codename, Filename, FilenameSchemaArray, Digest, Base, Contest, Exercise
+
+
+class Exercise(Base):
+    """
+    Class to store a exercise.
+    """
+
+    __tablename__ = 'exercise'
+    __table_args__ = (
+        UniqueConstraint('contest_id', 'num'),
+        UniqueConstraint('contest_id', 'name'),
+    )
+
+    # Auto incremented Primary key
+    id = Column(
+        Integer,
+        primary_key=True,
+        autoincrement='ignore_fk'
+    )
+
+    # Used for sorting
+    num = Column(
+        Integer,
+        nullable=True)
+
+    # Creating the relation to the Contest with backpopulation
+    contest_id = Column(
+        Integer,
+        ForeignKey(Contest.id,
+                   onupdate="CASCADE", ondelete="CASCADE"),
+        nullable=True,
+        index=True
+    )
+
+    contest = relationship(
+        Contest,
+        back_populates="exercises")
+
+    # name of the exercise
+    name = Column(
+        Codename,
+        nullable=False,
+        unique=True
+    )
+
+    # Title of the exercise
+    title = Column(
+        Unicode,
+        nullable=False,
+    )
+
+    # Tags of the exercise for filtering
+    exercise_tags = Column(
+        Unicode,
+        nullable=True
+    )
+
+    tasks = relationship(
+        "Task",
+        collection_class=ordering_list("num"),
+        order_by="[Task.num]",
+        cascade="all",
+        passive_deletes=True,
+        back_populates="exercise"
+    )
+
+    def get_best_user_scores_sum(self, user):
+        sum = 0
+        for task in self.tasks:
+            sum += task.get_best_score_for_user(user)
+        return sum
 
 
 class Task(Base):

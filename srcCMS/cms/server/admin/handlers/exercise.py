@@ -58,6 +58,7 @@ class ExerciseHandler(BaseHandler):
             self.get_string(attrs, "exercise_tags", empty=None)
 
             assert attrs.get("name") is not None, "No Exercise name specified"
+            exercise.set_attrs(attrs)
 
         except Exception as err:
             self.service.add_notification(

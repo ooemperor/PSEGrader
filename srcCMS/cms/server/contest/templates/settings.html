@@ -1,0 +1,60 @@
+{% extends "contest.html" %}
+
+{% set page = "settings" %}
+
+{% block core %}
+
+
+<div class="span9">
+    <form action="{{ contest_url("settings") }}" method="POST">
+      {{ xsrf_form_html|safe }}
+      <div class="page-header">
+          <h1>{% trans %}Settings{% endtrans %}</h1>
+
+      </div>
+      {% set username=user.username %}
+      {% set firstName=user.first_name %}
+      {% set lastName=user.last_name %}
+      <p>You're logged in as {{ firstName }} {{ lastName }} ({{ username }}).</p>
+      
+      <h2>Change password</h2>
+      <p>Password must be at least 6 characters long</p>
+
+      <input type="password" name="password_1" id="password_1" onkeyup="compare_passwords()" placeholder="enter new password">
+      <br>
+      <br>
+      <input type="password" name="password_2" id="password_2" onkeyup="compare_passwords()" placeholder="repeat new password">
+      <br>
+      <br>
+      <button type="submit" id="pw_change_button" class="btn btn-success" disabled="true">{% trans %}Submit{% endtrans %}</button>
+
+      <h2>{% trans %}Languages{% endtrans %}</h2>
+      {% if available_translations|length > 1 %}
+        <p>
+            <select id="lang" class="btn btn-success" onchange="utils.switch_lang()">
+                <option value=""{% if cookie_translation is none %} selected{% endif %}>{% trans lang=automatic_translation.name %}Automatic ({{ lang }}){% endtrans %}</option>
+            {% for lang_code, t in available_translations|dictsort(by="key") %}
+                <option value="{{ lang_code }}"{% if t == cookie_translation %} selected{% endif %}>{{ t.name }}</option>
+            {% endfor %}
+            </select>
+        </p>
+      {% endif %}
+  </form>
+</div>
+<script>
+  function compare_passwords() {
+    var pw1, pw2, bt1;
+    pw1 = document.getElementById("password_1");
+    pw2 = document.getElementById("password_2");
+    bt1 = document.getElementById("pw_change_button");
+    if ((pw1.value === pw2.value) && pw1.value.length > 5) {
+      bt1.disabled = false;
+    }
+    else {
+      bt1.disabled = true;
+    }
+  }
+</script>
+
+
+{% endblock core %}

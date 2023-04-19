@@ -74,7 +74,7 @@ HANDLERS = [
     (r"/notifications", NotificationsHandler),
     (r"/printing", PrintingHandler),
     (r"/documentation", DocumentationHandler),
-    (r"/passwordReset", PasswordResetHandler),
+    (r"/settings", PasswordResetHandler),
     (r"/passwordForgotten", PasswordForgottenHandler),
 
     # Exercise

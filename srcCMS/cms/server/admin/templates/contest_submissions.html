@@ -29,7 +29,7 @@
 </div>
 
 
-<h2 id="title_submissions" class="toggling_off">Submissions</h2>
+<h2 id="title_submissions" class="toggling_on">Submissions</h2>
 <div id="submissions">
 
   <p>
@@ -41,6 +41,7 @@
 
   {% set page_url = url["contest"][contest.id]["submissions"] %}
   {% include "fragments/submission_rows.html" %}
+  <div class="hr"></div>
 </div>
 
 {% endblock core %}

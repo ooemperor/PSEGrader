@@ -17,6 +17,7 @@ import traceback
 import tornado.web
 
 from cms.db import Attachment, Dataset, Session, Exercise
+from cms.util import string_formatting
 from cmscommon.datetime import make_datetime
 
 from .base import BaseHandler, SimpleHandler, require_permission
@@ -54,6 +55,7 @@ class ExerciseHandler(BaseHandler):
             # getting the values from the html file.
             attrs = exercise.get_attrs()
             self.get_string(attrs, "name", empty=None)
+            attrs["name"] = string_formatting(attrs["name"])
             self.get_string(attrs, "title")
             self.get_string(attrs, "exercise_tags", empty=None)
 
@@ -110,6 +112,7 @@ class AddExerciseHandler(SimpleHandler("add_exercise.html", permission_all=True)
             # getting values from template
             attrs = dict()
             self.get_string(attrs, "name", empty=None)
+            attrs["name"] = string_formatting(attrs["name"])
             assert attrs.get("name") is not None, "No exercise name specified."
             self.get_string(attrs, "title", empty=None)
             if attrs.get("title") is None:

@@ -40,6 +40,28 @@ showTaskTypeOption({{ dataset.id }});
   <div class="hr"></div>
 </div>
 
+<h2 id="title_Score_per_User" class="toggling_on">Score per User</h2>
+<div id="Score_per_User">
+  <table id="data_table" class="bordered">
+    <thead id = data_table_head>
+      <tr>
+        <th>Username</th>
+        <th>Task</th>
+        <th>Score</th>
+      </tr>
+    </thead>
+    <tbody id="data_table_body">
+      {% for u in user_list|sort(attribute="username") %}
+      <tr>
+        <td><a href="{{ url("user", u.id) }}">{{ u.username }}</a></td>
+        <td>{{ task.name }}</td>
+        <td>{{task.get_best_score_for_user(u)}}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
 <!-- We use "multipart/form-data" to have Tornado distinguish between missing and empty values. -->
 <form enctype="multipart/form-data" action="{{ url("task", task.id) }}" method="POST" style="display:inline;">
   {{ xsrf_form_html|safe }}

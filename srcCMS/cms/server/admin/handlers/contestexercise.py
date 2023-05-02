@@ -126,6 +126,7 @@ class AddContestExerciseHandler(BaseHandler):
 
         # adding all the tasks of the exercise as well to the contest
         for task in exercise.tasks:
+            task.num = len(self.contest.tasks)
             task.contest = self.contest
 
 

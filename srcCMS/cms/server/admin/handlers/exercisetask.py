@@ -119,9 +119,12 @@ class AddExerciseTasksHandler(BaseHandler):
 
         task = self.safe_get_item(Task, task_id)
 
-        # Assign the task to the contest.
+        # Assign the task to the exercise.
         task.num = len(self.exercise.tasks)
         task.exercise = self.exercise
+
+        if self.exercise.contest is not None:
+            task.contest = self.exercise.contest
 
         if self.try_commit():
             # Create the user on RWS.

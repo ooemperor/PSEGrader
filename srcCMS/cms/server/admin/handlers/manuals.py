@@ -36,4 +36,5 @@ class ManualsHandler(BaseHandler):
         Rendering the manuals page
         :return: No return statement.
         """
+        self.r_params = self.render_params()
         self.render("manuals.html", **self.r_params)

@@ -20,6 +20,8 @@ Then install the following packages:
 
 <code>sudo apt-get install libcap-dev libcups2-dev libpq-dev python3-dev libcgroup-dev openjdk-17-jdk openjdk-17-jre zip -y</code>
 
+This documentation has been tested and found working correctly under Python 3.9.2
+
 ## Getting the repository
 Cloning via HTTPs so no ssh key is needed:
 
@@ -127,10 +129,15 @@ Switch back to root:
 <code>exit</code>
 
 Last start the services:
+
+If the services are already running you can kill them all with the command:
+<code>pkill -f cms*</code> and then continue to start the services. 
+
 <code>nohup cmsAdminWebServer &</code>
 
-<code>nohup cmsResourceService -a XXX" &</code>
+<code>nohup cmsResourceService -a ALL" &</code>
 
 <code>nohup cmsLogService &</code>
 
-Replace XXX with the row number of the contest you want to run. The cmsResourceService will automatically start the cmsContestWebServer. 
+The cmsResourceService will automatically start the cmsContestWebServer. 
+All the avaible Contests are now hosted and online. 

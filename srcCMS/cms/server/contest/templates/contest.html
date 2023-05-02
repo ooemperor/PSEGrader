@@ -152,11 +152,6 @@ $(document).ready(function () {
                             <li{% if page == "overview" %} class="active"{% endif %}>
                                 <a href="{{ contest_url() }}">{% trans %}Overview{% endtrans %}</a>
                             </li>
-                            <li{% if page == "communication" %} class="active"{% endif %}>
-                                <a href="{{ contest_url("communication") }}">{% trans %}Communication{% endtrans %}
-                                    <span id="unread_count" class="label label-warning no_unread"></span>
-                                </a>
-                            </li>
                             <li{% if page == "settings" %} class="active"{% endif %}>
                                 <a href="{{ contest_url("settings") }}">{% trans %}Settings{% endtrans %}</a>
                             </li>

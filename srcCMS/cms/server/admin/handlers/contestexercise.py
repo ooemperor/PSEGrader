@@ -10,7 +10,7 @@ from __future__ import unicode_literals
 from future.builtins.disabled import *  # noqa
 from future.builtins import *  # noqa
 
-from cms.db import Contest, Exercise
+from cms.db import Contest, Exercise, Task
 from cmscommon.datetime import make_datetime
 
 from .base import BaseHandler, require_permission
@@ -123,6 +123,11 @@ class AddContestExerciseHandler(BaseHandler):
         # Assign the exercise to the contest.
         exercise.num = len(self.contest.exercises)
         exercise.contest = self.contest
+
+        # adding all the tasks of the exercise as well to the contest
+        for task in exercise.tasks:
+            task.contest = self.contest
+
 
         if self.try_commit():
             # Create the exercise on RWS.

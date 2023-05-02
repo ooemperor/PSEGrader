@@ -55,6 +55,7 @@ PACKAGE_DATA = {
         "admin/templates/*.*",
         "admin/templates/fragments/*.*",
         "admin/templates/views/*.*",
+        "admin/manuals/*.*",
         "contest/static/*.*",
         "contest/static/css/*.*",
         "contest/static/img/*.*",

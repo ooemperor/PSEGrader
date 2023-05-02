@@ -95,9 +95,11 @@ $(document).ready(init);
         {% if contest is none %}
           <li class="menu_entry"><a class="menu_link" href="{{ url() }}">Overview</a></li>
           <li class="menu_entry"><a class="menu_link" href="{{ url("resourceslist") }}">Resource usage</a></li>
+          <li class="menu_entry"><a class="menu_link" href="{{ url("manuals") }}">Manuals</a></li>
         {% else %}
           <li class="menu_entry"><a class="menu_link" href="{{ url("contest", contest.id, "overview") }}">Overview</a></li>
           <li class="menu_entry"><a class="menu_link" href="{{ url("contest", contest.id, "resourceslist") }}">Resource usage</a></li>
+          <li class="menu_entry"><a class="menu_link" href="{{ url("manuals") }}">Manuals</a></li>
         {% endif %}
         </ul>
         <div class="hr"></div>

@@ -131,10 +131,10 @@ setup(
     version=find_version(),
     author="The CMS development team",
     author_email="contestms@googlegroups.com",
-    url="https://github.com/cms-dev/cms",
-    download_url="https://github.com/cms-dev/cms/archive/master.tar.gz",
+    url="https://github.com/ooemperor/PSEGrader",
+    download_url="https://github.com/ooemperor/PSEGrader",
     description="A contest management system and grader "
-                "for IOI-like programming competitions",
+                "for IOI-like programming competitions with specification for universities",
     packages=find_packages(),
     package_data=PACKAGE_DATA,
     cmdclass={"build_py": build_py_and_l10n},

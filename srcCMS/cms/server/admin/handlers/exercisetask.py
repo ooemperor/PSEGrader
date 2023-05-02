@@ -64,6 +64,7 @@ class ExerciseTasksHandler(BaseHandler):
 
             # Unassign the task to the contest.
             task.exercise = None
+            task.contest = None
             task.num = None  # not strictly necessary
 
             # Decrease by 1 the num of every subsequent task.

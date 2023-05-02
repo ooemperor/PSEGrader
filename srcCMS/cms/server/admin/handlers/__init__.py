@@ -139,7 +139,7 @@ HANDLERS = [
     (r"/file/([a-f0-9]+)/([a-zA-Z0-9_.-]+)", FileFromDigestHandler),
     (r"/manuals", ManualsHandler),
 
-    (r"/manuals/(.*"), tornado.web.StaticFileHandler, {'path' : './cms/server/admin/manuals'},
+    (r"/manuals/(.*)", tornado.web.StaticFileHandler, {'path' : './cms/server/admin/manuals'}),
 
     # Contest
 

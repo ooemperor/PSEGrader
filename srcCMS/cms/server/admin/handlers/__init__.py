@@ -43,6 +43,8 @@ from .contest import \
     ResourcesListHandler, \
     ContestListHandler, \
     RemoveContestHandler
+from .manuals import \
+    ManualsHandler
 from .contestuser import \
     ContestUsersHandler, \
     RemoveParticipationHandler, \
@@ -133,6 +135,7 @@ HANDLERS = [
     (r"/resources/([0-9]+|all)/([0-9]+)", ResourcesHandler),
     (r"/notifications", NotificationsHandler),
     (r"/file/([a-f0-9]+)/([a-zA-Z0-9_.-]+)", FileFromDigestHandler),
+    (r"/manuals", ManualsHandler),
 
     # Contest
 

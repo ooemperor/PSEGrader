@@ -129,6 +129,10 @@ Switch back to root:
 <code>exit</code>
 
 Last start the services:
+
+If the services are already running you can kill them all with the command:
+<code>pkill -f cms*</code> and then continue to start the services. 
+
 <code>nohup cmsAdminWebServer &</code>
 
 <code>nohup cmsResourceService -a ALL" &</code>

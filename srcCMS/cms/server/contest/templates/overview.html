@@ -199,7 +199,7 @@
     {% if actual_phase == 0 or actual_phase == 3%}
     <h2>{% trans %}Exercise overview{% endtrans %}</h2>
 
-    <input type="text" id="tag_input" onkeyup="filter_by_tag()" style="width:100%; height:50px; box-sizing: border-box; margin-bottom: 12px;" placeholder="Search for exercise tags...">
+    <input type="text" id="tag_input" onkeyup="filter_by_tag()" style="width:100%; height:50px; box-sizing: border-box; margin-bottom: 12px;" placeholder="{% trans %}Search for exercise tags...{% endtrans %}">
 
     <table class="table table-bordered table-striped" id="exercise_overview">
         <thead>

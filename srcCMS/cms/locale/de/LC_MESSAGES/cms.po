@@ -1102,3 +1102,39 @@ msgstr "Die Eingabedatei darf maximal %d Bytes groß sein."
 
 msgid "Test storage failed!"
 msgstr "Speichern des Tests fehlgeschlagen!"
+
+# Custom Translations to german
+msgid "Tasks of this exercise"
+msgstr "Tasks dieses Exercises"
+
+msgid "Settings"
+msgstr "Einstellungen"
+
+msgid "Change Password"
+msgstr "Passwort ändern"
+
+msgid "enter new password"
+msgstr "Neues Passwort eingeben"
+
+msgid "repeat new password"
+msgstr "Neues Passwort wiederholen"
+
+msgid "Forgot your Password?"
+msgstr "Passwort vergessen?"
+
+msgid "Please enter username to reset the password:"
+msgstr "Usernamen eingeben um Passwort zurückzusetzen"
+
+msgid "Reset Password"
+msgstr "Passwort zurücksetzen"
+
+msgid "Exercise overview"
+msgstr "Exercise Übersicht"
+
+msgid "Search for exercise tags..."
+msgstr "Suche nach Exercise Tags"
+
+msgid "Reset was not successful, try again or contact your contest Administrator"
+msgstr "Zurücksetzen war nicht erfolgreich, verusche es erneut oder kontaktiere einen Administrtor"
+
+

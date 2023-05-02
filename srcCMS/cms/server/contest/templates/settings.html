@@ -15,7 +15,7 @@
       {% set username=user.username %}
       {% set firstName=user.first_name %}
       {% set lastName=user.last_name %}
-      <p>{% trans %}You're logged in as {{ firstName }} {{ lastName }} ({{ username }}).{% endtrans %} </p>
+      <p>{% trans %}You're logged in as{% endtrans %} {{ firstName }} {{ lastName }} ({{ username }}).</p>
 
       <h2>{% trans %}Change password{% endtrans %}</h2>
       <p>Password must be at least 6 characters long</p>

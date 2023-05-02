@@ -27,7 +27,6 @@ from __future__ import unicode_literals
 from future.builtins.disabled import *  # noqa
 from future.builtins import *  # noqa
 
-import tornado.web
 
 from .base import \
     FileFromDigestHandler, \
@@ -139,7 +138,6 @@ HANDLERS = [
     (r"/file/([a-f0-9]+)/([a-zA-Z0-9_.-]+)", FileFromDigestHandler),
     (r"/manuals", ManualsHandler),
 
-    (r"/manuals/([a-zA-Z0-9_.-]+)", tornado.web.StaticFileHandler, {'path' : './cms/server/admin/manuals'}),
 
     # Contest
 

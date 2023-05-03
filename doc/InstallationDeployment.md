@@ -74,14 +74,16 @@ Use this for later login.
 
 
 ## Starting all the services in Headless Mode
+All these commands need to run in Headless mode (nohup) because, if not in headless each of these following commands will block the commandline. 
+Further if the command are not run in headless, and the terminal to the server is closed, the services will stop working. 
 
 <code>nohup cmsAdminWebServer &</code>
 
-<code>nohup cmsResourceService -a XXX" &</code>
+<code>nohup cmsResourceService -a ALL &</code>
 
 <code>nohup cmsLogService &</code>
 
-Replace XXX with the row number of the contest you want to run. The cmsResourceService will automatically start the cmsContestWebServer. 
+The cmsResourceService will automatically start the cmsContestWebServer. 
 
 
 ## Redeploying a newer Version. 
@@ -133,9 +135,12 @@ Last start the services:
 If the services are already running you can kill them all with the command:
 <code>pkill -f cms*</code> and then continue to start the services. 
 
+All these commands need to run in Headless mode (nohup) because, if not in headless each of these following commands will block the commandline. 
+
+
 <code>nohup cmsAdminWebServer &</code>
 
-<code>nohup cmsResourceService -a ALL" &</code>
+<code>nohup cmsResourceService -a ALL &</code>
 
 <code>nohup cmsLogService &</code>
 

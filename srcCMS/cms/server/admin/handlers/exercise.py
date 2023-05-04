@@ -114,7 +114,7 @@ class AddExerciseHandler(SimpleHandler("add_exercise.html", permission_all=True)
             self.get_string(attrs, "name", empty=None)
             attrs["name"] = string_formatting(attrs["name"])
             assert attrs.get("name") is not None, "No exercise name specified."
-            self.get_string(attrs, "title", empty=None)
+            self.get_string(attrs, "title", empty="")
             if attrs.get("title") is None:
                 attrs["title"] = attrs["name"]
             self.get_string(attrs, "exercise_tags", empty="")

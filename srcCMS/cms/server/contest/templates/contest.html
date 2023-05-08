@@ -158,11 +158,11 @@ $(document).ready(function () {
     {% if actual_phase == 0 or actual_phase == 3 or participation.unrestricted %}
         {% for e_iter in contest.exercises %}
                             <li class="nav-header">
-                                <a href="{{ contest_url("exercises", e_iter.name) }}">{{ e_iter.name }}</a>
+                                <a href="{{ contest_url("exercises", e_iter.name) }}">{{ e_iter.title }}</a>
                                 {% if page == "exercise" and exercise == e_iter or page == "task_submissions" and e_iter.tasks.__contains__(task) %}
                                   {% for t_iter in e_iter.tasks %}
                                     <li {% if page == "task_submissions" and task == t_iter %} class="active"  {% endif %}>
-                                      <a href="{{ contest_url("tasks", t_iter.name, "submissions") }}" style="text-indent: 20px;">{{ t_iter.name }}</a>
+                                      <a href="{{ contest_url("tasks", t_iter.name, "submissions") }}" style="text-indent: 20px;">{{ t_iter.title }}</a>
                                     </li>
                                   {% endfor %}
                                 {% endif %}

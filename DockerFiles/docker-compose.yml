@@ -1,0 +1,37 @@
+version: '3'
+
+services:
+  cms:
+    container_name: Grader
+    build: ./grader
+    networks:
+      my-network:
+        ipv4_address: 172.16.238.10 # Replace with the desired IP address
+    ports:
+      - 127.0.0.1:10000:8888
+      - 127.0.0.1:10001:8889
+      - 127.0.0.1:10002:8890
+    volumes:
+      - ./code/code:/code/PSEGrader
+      - ./code/lib:/usr/lib/python3.9/site-packages
+      - ./code/logs:/var/local/log/cms 
+    restart: always
+
+  postgres:
+    container_name: cmsdb
+    image: postgres
+    networks:
+      my-network:
+        ipv4_address: 172.16.238.11 # Replace with the desired IP address
+    restart: always
+    environment:
+      POSTGRES_DB: cmsdb
+      POSTGRES_USER: cmsuser
+      POSTGRES_PASSWORD: cmsuser
+
+networks:
+  my-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.16.238.0/24 # Replace with the desired IP address range

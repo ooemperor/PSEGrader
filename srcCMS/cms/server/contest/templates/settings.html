@@ -17,8 +17,8 @@
       {% set lastName=user.last_name %}
       <p>{% trans %}You're logged in as{% endtrans %} {{ firstName }} {{ lastName }} ({{ username }}).</p>
 
-      <h2>{% trans %}Change password{% endtrans %}</h2>
-      <p>Password must be at least 6 characters long</p>
+      <h2>{% trans %}Change Password{% endtrans %}</h2>
+      <p>{% trans %}Password must be at least 6 characters long{% endtrans %}</p>
 
       <input type="password" name="password_1" id="password_1" onkeyup="compare_passwords()" placeholder="{% trans %}enter new password{% endtrans %}">
       <br>

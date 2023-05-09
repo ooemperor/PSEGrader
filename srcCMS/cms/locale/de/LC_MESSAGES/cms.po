@@ -1113,6 +1113,9 @@ msgstr "Einstellungen"
 msgid "Change Password"
 msgstr "Passwort ändern"
 
+msgid "Password must be at least 6 characters long"
+msgstr "Passwort muss mindestens 6 Zeichen lang sein"
+
 msgid "enter new password"
 msgstr "Neues Passwort eingeben"
 

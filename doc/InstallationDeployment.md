@@ -1,8 +1,10 @@
-# Setting up the cms server
+# Installation Guide for PSEGrader
 
 This is a short Guide on how to Install the CMS Version on a Debian Server. As long as there is nothing specified, do run all the commands as root. 
 
-## Prepartion of the server
+Everyone who uses MobaXterm, please see the paragraph about automation first, to make the installation faster. 
+
+## Preparation of the server
 
 Install Postgres:
 
@@ -63,7 +65,7 @@ Then:
 <code>cmsInitDB</code>
 
 Then last:
-Within the package of pycrypto you have to correct all occurences of time.clock() to time.time()
+Within the package of pycrypto you have to correct all occurrences of time.clock() to time.time()
 
 
 ## Create Admin user
@@ -87,7 +89,7 @@ The cmsResourceService will automatically start the cmsContestWebServer.
 
 
 ## Redeploying a newer Version. 
-We can redeploy a new Version of CMS with or without deleting all the Contests, Submissions etc in the database. 
+We can redeploy a new Version of CMS with or without deleting all the Contests, Submissions etc. in the database. 
 
 ### Deleting all the data
 before doing anything run 
@@ -145,4 +147,16 @@ All these commands need to run in Headless mode (nohup) because, if not in headl
 <code>nohup cmsLogService &</code>
 
 The cmsResourceService will automatically start the cmsContestWebServer. 
-All the avaible Contests are now hosted and online. 
+All the available Contests are now hosted and online. 
+
+## Automation
+For everyone who uses MobaXterm, there is a .mxtmacros file included in this doc folder. You can import this files as macros. 
+Included you will find two macros. One is for the deployment with Autostart. This will automatically start up, the AdminWebServer, the ResourceService for all the Contests and the LogService. 
+The second macro will just deploy everything. This is the better choice, if you need to create the database first, before starting up.
+
+Before using them, you will need to find the step where the password of the postgres user is entered and change the value. 
+The value to replace is `<INSERTYOURPASSWORDHERE>` for both macros. 
+
+PS: Use of the macros on your own risk. 
+
+
